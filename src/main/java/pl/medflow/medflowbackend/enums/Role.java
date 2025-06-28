@@ -6,8 +6,4 @@ public enum Role {
     PATIENT,
     ADMIN,
     SYSTEM_ADMIN;
-
-    public String getRoleName() {
-        return this.name().toLowerCase();
-    }
 }
