@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-class AwsSecretsService implements AwsSecrets {
+public class AwsSecretsService implements AwsSecrets {
 
     private final AwsSecretsLoader loader;
     private Map<String, String> secrets;

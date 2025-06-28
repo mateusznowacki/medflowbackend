@@ -14,7 +14,7 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueReques
 import java.util.Map;
 
 @Component
-class AwsSecretsLoader {
+public class AwsSecretsLoader {
 
     @Value("${aws.profile-name:}")
     private String profileName;
