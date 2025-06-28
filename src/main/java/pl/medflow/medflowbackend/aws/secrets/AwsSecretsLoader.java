@@ -2,7 +2,7 @@ package pl.medflow.medflowbackend.aws.secrets;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
@@ -14,21 +14,28 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueReques
 import java.util.Map;
 
 @Component
-@RequiredArgsConstructor
 class AwsSecretsLoader {
 
-    private final AwsSecretsProperties props;
+    @Value("${aws.profile-name:}")
+    private String profileName;
 
-    public Map<String, String> load() {
+    @Value("${aws.region}")
+    private String region;
+
+    @Value("${aws.secret-name}")
+    private String secretName;
+
+    Map<String, String> load() {
         AwsCredentialsProvider creds = resolveCredentials();
+
         try (SecretsManagerClient client = SecretsManagerClient.builder()
-                .region(Region.of(props.getRegion()))
+                .region(Region.of(region))
                 .credentialsProvider(creds)
                 .build()) {
 
             String json = client.getSecretValue(
                     GetSecretValueRequest.builder()
-                                         .secretId(props.getSecretName())
+                                         .secretId(secretName)
                                          .build())
                                 .secretString();
 
@@ -40,13 +47,12 @@ class AwsSecretsLoader {
     }
 
     private AwsCredentialsProvider resolveCredentials() {
-        String profile = props.getProfileName();
-        if (profile == null || profile.isBlank()) {
+        if (profileName == null || profileName.isBlank()) {
             return DefaultCredentialsProvider.create();
         }
         try {
-            return ProfileCredentialsProvider.create(profile);
-        } catch (Exception e) {
+            return ProfileCredentialsProvider.create(profileName);
+        } catch (Exception ex) {
             return DefaultCredentialsProvider.create();
         }
     }
