@@ -1,27 +1,31 @@
 package pl.medflow.medflowbackend.entities.users;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import pl.medflow.medflowbackend.entities.embedded.RoomLocation;
 import pl.medflow.medflowbackend.enums.MedicalStaffPosition;
 
-import java.time.LocalDate;
-
-@Document(collection = "users")
+@Document(collection = "staff")
 @TypeAlias("medicalStaff")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
+@CompoundIndex(name = "email_unique_staff", def = "{ 'email': 1 }", unique = true)
 public class MedicalStaff extends User {
 
     private MedicalStaffPosition position;
+
+    /** change to departmentId later */
     private String department;
+
     private RoomLocation assignedRoom;
+
+    @Indexed(unique = true, sparse = true)
     private String licenseNumber;
-
-
-
 }

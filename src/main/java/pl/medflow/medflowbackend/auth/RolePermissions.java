@@ -1,42 +1,36 @@
-package pl.medflow.medflowbackend.entities;
+package pl.medflow.medflowbackend.auth;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.medflow.medflowbackend.entities.embedded.RoomLocation;
+import pl.medflow.medflowbackend.enums.Role;
+import pl.medflow.medflowbackend.enums.Permission;
 
 import java.time.Instant;
 import java.util.List;
 
-@Document(collection = "facilities")
+@Document(collection = "roles")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Facility {
+public class RolePermissions {
 
     @Id
     private String id;
 
     @Indexed(unique = true)
-    private String name;
+    private Role role;
 
-    // Możesz podmienić na Address VO, jeśli chcesz (masz już Address w projekcie)
-    private String address;
+    private List<Permission> permissions;
 
-    private List<RoomLocation> rooms;
-
-    // np. PL-DS (Dolnośląskie) lub inny własny podział
-    private String regionCode;
-
-    // ważne dla konwersji godzin wizyt (np. "Europe/Warsaw")
-    private String timezone;
+    private String description;
 
     @CreatedDate
     private Instant createdAt;
