@@ -1,13 +1,13 @@
-package pl.medflow.medflowbackend.user.controller;
+package pl.medflow.medflowbackend.domain.user.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.medflow.medflowbackend.user.dto.DoctorRegistrationRequest;
-import pl.medflow.medflowbackend.user.dto.UserResponse;
-import pl.medflow.medflowbackend.user.service.UserService;
+import pl.medflow.medflowbackend.domain.user.dto.DoctorRegistrationRequest;
+import pl.medflow.medflowbackend.domain.user.dto.UserResponse;
+import pl.medflow.medflowbackend.domain.user.service.UserService;
 
 import java.util.List;
 import java.util.Optional;

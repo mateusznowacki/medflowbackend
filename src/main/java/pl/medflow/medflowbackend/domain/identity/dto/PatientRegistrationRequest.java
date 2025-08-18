@@ -1,11 +1,11 @@
-package pl.medflow.medflowbackend.user.dto;
+package pl.medflow.medflowbackend.domain.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import pl.medflow.medflowbackend.shared.enums.Gender;
-import pl.medflow.medflowbackend.shared.embedded.Address;
+import pl.medflow.medflowbackend.domain.shared.enums.Gender;
+import pl.medflow.medflowbackend.domain.shared.embedded.Address;
 
 import java.time.LocalDate;
 import java.util.List;

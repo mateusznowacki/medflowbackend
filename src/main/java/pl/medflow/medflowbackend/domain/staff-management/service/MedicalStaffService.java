@@ -1,13 +1,13 @@
-package pl.medflow.medflowbackend.user.service;
+package pl.medflow.medflowbackend.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.medflow.medflowbackend.shared.enums.Role;
-import pl.medflow.medflowbackend.user.dto.MedicalStaffRegistrationRequest;
-import pl.medflow.medflowbackend.user.dto.UserResponse;
-import pl.medflow.medflowbackend.user.model.MedicalStaff;
-import pl.medflow.medflowbackend.user.model.UserRepository;
+import pl.medflow.medflowbackend.domain.shared.enums.Role;
+import pl.medflow.medflowbackend.domain.user.dto.MedicalStaffRegistrationRequest;
+import pl.medflow.medflowbackend.domain.user.dto.UserResponse;
+import pl.medflow.medflowbackend.domain.user.model.MedicalStaff;
+import pl.medflow.medflowbackend.domain.user.model.UserRepository;
 
 import java.util.List;
 import java.util.Optional;

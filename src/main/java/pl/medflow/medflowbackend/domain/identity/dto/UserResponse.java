@@ -1,38 +1,30 @@
-package pl.medflow.medflowbackend.user.dto;
+package pl.medflow.medflowbackend.domain.user.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import pl.medflow.medflowbackend.shared.enums.Gender;
-import pl.medflow.medflowbackend.shared.enums.MedicalStaffPosition;
-import pl.medflow.medflowbackend.shared.enums.Role;
-import pl.medflow.medflowbackend.shared.embedded.Address;
-import pl.medflow.medflowbackend.shared.embedded.RoomLocation;
+import pl.medflow.medflowbackend.domain.shared.enums.Gender;
+import pl.medflow.medflowbackend.domain.shared.enums.MedicalStaffPosition;
+import pl.medflow.medflowbackend.domain.shared.enums.Role;
+import pl.medflow.medflowbackend.domain.shared.embedded.Address;
+import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
-public class UserRegistrationRequest {
+public class UserResponse {
     
-    @NotBlank
+    private String id;
     private String firstName;
-    
-    @NotBlank
     private String lastName;
-    
-    @Email
-    @NotBlank
     private String email;
-    
-    @NotBlank
-    private String password;
-    
-    @Pattern(regexp = "^[0-9+\\- ]{7,15}$", message = "Invalid phone number format")
     private String phoneNumber;
-    
     private Role role;
+    private boolean active;
+    private boolean emailVerified;
+    private Instant lastLoginAt;
+    private Instant createdAt;
+    private Instant updatedAt;
     
     // Doctor specific fields
     private String licenseNumber;
@@ -40,7 +32,7 @@ public class UserRegistrationRequest {
     private String department;
     private RoomLocation office;
     private List<String> procedureIds;
-    private Boolean acceptingPatients;
+    private boolean acceptingPatients;
     
     // Patient specific fields
     private String nationalId;
@@ -49,7 +41,9 @@ public class UserRegistrationRequest {
     private Address address;
     private String emergencyContactName;
     private String emergencyContactPhone;
-    private Boolean consentGiven;
+    private boolean consentGiven;
+    private Instant termsAcceptedAt;
+    private Instant privacyPolicyAcceptedAt;
     private List<String> allergies;
     private List<String> medications;
     private List<String> chronicDiseases;

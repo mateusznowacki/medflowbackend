@@ -1,15 +1,14 @@
-package pl.medflow.medflowbackend.user.dto;
+package pl.medflow.medflowbackend.domain.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import pl.medflow.medflowbackend.shared.embedded.RoomLocation;
-
-import java.util.List;
+import pl.medflow.medflowbackend.domain.shared.enums.MedicalStaffPosition;
+import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
 
 @Data
-public class DoctorRegistrationRequest {
+public class MedicalStaffRegistrationRequest {
     
     @NotBlank
     private String firstName;
@@ -27,12 +26,8 @@ public class DoctorRegistrationRequest {
     @Pattern(regexp = "^[0-9+\\- ]{7,15}$", message = "Invalid phone number format")
     private String phoneNumber;
     
-    @NotBlank
-    private String licenseNumber;
-    
-    private String specialization;
+    private MedicalStaffPosition position;
     private String department;
-    private RoomLocation office;
-    private List<String> procedureIds;
-    private Boolean acceptingPatients = true;
+    private RoomLocation assignedRoom;
+    private String licenseNumber;
 } 
