@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.auth;
+package pl.medflow.medflowbackend.domain.identity.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,8 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.medflow.medflowbackend.domain.enums.Role;
-import pl.medflow.medflowbackend.domain.enums.Permission;
+import pl.medflow.medflowbackend.domain.shared.enums.Role;
+import pl.medflow.medflowbackend.domain.shared.enums.Permission;
 
 import java.time.Instant;
 import java.util.List;

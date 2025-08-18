@@ -1,14 +1,14 @@
-// src/main/java/pl/medflow/medflowbackend/auth/AuthController.java
-package pl.medflow.medflowbackend.domain.auth;
+package pl.medflow.medflowbackend.domain.identity.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.medflow.medflowbackend.domain.auth.dto.LoginRequest;
-import pl.medflow.medflowbackend.domain.auth.dto.LoginResponse;
-import pl.medflow.medflowbackend.domain.security.JwtProperties;
+import pl.medflow.medflowbackend.domain.identity.dto.LoginRequest;
+import pl.medflow.medflowbackend.domain.identity.dto.LoginResponse;
+import pl.medflow.medflowbackend.domain.infrastructure.security.JwtProperties;
+import pl.medflow.medflowbackend.domain.identity.service.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")

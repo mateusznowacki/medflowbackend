@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.users;
+package pl.medflow.medflowbackend.domain.doctor_management.model;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -7,8 +7,9 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.medflow.medflowbackend.domain.entities.MedicalProcedure;
-import pl.medflow.medflowbackend.domain.entities.embedded.RoomLocation;
+import pl.medflow.medflowbackend.domain.medical_records.model.MedicalProcedure;
+import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
+import pl.medflow.medflowbackend.domain.identity.model.User;
 
 import java.util.List;
 

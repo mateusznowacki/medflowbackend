@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.users;
+package pl.medflow.medflowbackend.domain.identity.model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +12,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
-import pl.medflow.medflowbackend.domain.enums.Role;
+import pl.medflow.medflowbackend.domain.shared.enums.Role;
 
 import java.time.Instant;
 

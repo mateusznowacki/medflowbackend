@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.users;
+package pl.medflow.medflowbackend.domain.patient_management.model;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -6,8 +6,9 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.medflow.medflowbackend.domain.entities.embedded.Address;
-import pl.medflow.medflowbackend.domain.enums.Gender;
+import pl.medflow.medflowbackend.domain.shared.embedded.Address;
+import pl.medflow.medflowbackend.domain.shared.enums.Gender;
+import pl.medflow.medflowbackend.domain.identity.model.User;
 
 import java.time.LocalDate;
 import java.time.Instant;

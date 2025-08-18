@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.user.dto;
+package pl.medflow.medflowbackend.domain.identity.dto;
 
 import lombok.Data;
 import pl.medflow.medflowbackend.domain.shared.enums.Gender;

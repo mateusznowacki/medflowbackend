@@ -1,5 +1,4 @@
-// src/main/java/pl/medflow/medflowbackend/auth/AuthService.java
-package pl.medflow.medflowbackend.domain.auth;
+package pl.medflow.medflowbackend.domain.identity.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -7,13 +6,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import pl.medflow.medflowbackend.domain.auth.dto.BasicUser;
-import pl.medflow.medflowbackend.domain.auth.dto.LoginRequest;
-import pl.medflow.medflowbackend.domain.auth.dto.LoginResponse;
-import pl.medflow.medflowbackend.domain.users.User;
-import pl.medflow.medflowbackend.domain.users.UserRepository;
-import pl.medflow.medflowbackend.domain.security.JwtProperties;
-import pl.medflow.medflowbackend.domain.security.JwtService;
+import pl.medflow.medflowbackend.domain.identity.dto.BasicUser;
+import pl.medflow.medflowbackend.domain.identity.dto.LoginRequest;
+import pl.medflow.medflowbackend.domain.identity.dto.LoginResponse;
+import pl.medflow.medflowbackend.domain.identity.model.User;
+import pl.medflow.medflowbackend.domain.identity.repository.UserRepository;
+import pl.medflow.medflowbackend.domain.infrastructure.security.JwtProperties;
+import pl.medflow.medflowbackend.domain.infrastructure.security.JwtService;
+import pl.medflow.medflowbackend.domain.identity.repository.RefreshTokenRepository;
+import pl.medflow.medflowbackend.domain.identity.model.RefreshTokenDocument;
 
 import java.time.Duration;
 import java.time.Instant;

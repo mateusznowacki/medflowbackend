@@ -1,5 +1,4 @@
-// auth/RefreshTokenDocument.java
-package pl.medflow.medflowbackend.domain.auth;
+package pl.medflow.medflowbackend.domain.identity.model;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
