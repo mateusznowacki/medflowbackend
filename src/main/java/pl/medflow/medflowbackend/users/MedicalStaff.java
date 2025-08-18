@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.entities.users;
+package pl.medflow.medflowbackend.users;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
