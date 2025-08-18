@@ -10,9 +10,8 @@ import org.springframework.util.StringUtils;
 import pl.medflow.medflowbackend.auth.dto.BasicUser;
 import pl.medflow.medflowbackend.auth.dto.LoginRequest;
 import pl.medflow.medflowbackend.auth.dto.LoginResponse;
-import pl.medflow.medflowbackend.entities.users.User;
-import pl.medflow.medflowbackend.repositories.RefreshTokenRepository;
-import pl.medflow.medflowbackend.repositories.UserRepository;
+import pl.medflow.medflowbackend.users.User;
+import pl.medflow.medflowbackend.users.UserRepository;
 import pl.medflow.medflowbackend.security.JwtProperties;
 import pl.medflow.medflowbackend.security.JwtService;
 

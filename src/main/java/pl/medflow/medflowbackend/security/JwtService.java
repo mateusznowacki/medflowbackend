@@ -5,7 +5,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.medflow.medflowbackend.entities.users.User;
+import pl.medflow.medflowbackend.users.User;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
