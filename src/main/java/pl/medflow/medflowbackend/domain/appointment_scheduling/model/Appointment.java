@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.entities;
+package pl.medflow.medflowbackend.domain.appointment_scheduling.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.medflow.medflowbackend.domain.enums.AppointmentStatus;
+import pl.medflow.medflowbackend.domain.shared.enums.AppointmentStatus;
 
 import java.time.Instant;
 

@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.entities.embedded;
+package pl.medflow.medflowbackend.domain.shared.embedded;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

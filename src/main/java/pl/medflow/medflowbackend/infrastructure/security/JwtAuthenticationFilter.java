@@ -1,5 +1,5 @@
 // security/JwtAuthenticationFilter.java
-package pl.medflow.medflowbackend.domain.security;
+package pl.medflow.medflowbackend.infrastructure.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;

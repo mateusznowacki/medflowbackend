@@ -1,5 +1,5 @@
 // security/JwtProperties.java
-package pl.medflow.medflowbackend.domain.security;
+package pl.medflow.medflowbackend.infrastructure.security;
 
 import lombok.Getter;
 import lombok.Setter;

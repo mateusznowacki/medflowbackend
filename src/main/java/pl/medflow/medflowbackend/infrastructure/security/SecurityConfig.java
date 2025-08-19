@@ -1,5 +1,5 @@
 // security/SecurityConfig.java
-package pl.medflow.medflowbackend.domain.security;
+package pl.medflow.medflowbackend.infrastructure.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -1,11 +1,12 @@
 // security/JwtService.java
-package pl.medflow.medflowbackend.domain.security;
+package pl.medflow.medflowbackend.infrastructure.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.medflow.medflowbackend.domain.users.User;
+import pl.medflow.medflowbackend.domain.identity.model.User;
+import pl.medflow.medflowbackend.infrastructure.security.JwtProperties;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;

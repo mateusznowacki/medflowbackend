@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.aws.secrets;
+package pl.medflow.medflowbackend.infrastructure.secrets;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

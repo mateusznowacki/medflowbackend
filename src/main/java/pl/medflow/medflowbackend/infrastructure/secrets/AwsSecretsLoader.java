@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.aws.secrets;
+package pl.medflow.medflowbackend.infrastructure.secrets;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

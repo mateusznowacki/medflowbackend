@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.entities;
+package pl.medflow.medflowbackend.domain.facility_management.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.medflow.medflowbackend.domain.entities.embedded.RoomLocation;
+import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
 
 import java.time.Instant;
 import java.util.List;

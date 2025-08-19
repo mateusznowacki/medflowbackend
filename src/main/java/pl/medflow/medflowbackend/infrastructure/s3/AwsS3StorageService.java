@@ -1,8 +1,8 @@
-package pl.medflow.medflowbackend.domain.aws.s3;
+package pl.medflow.medflowbackend.infrastructure.s3;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
-import pl.medflow.medflowbackend.domain.aws.secrets.AwsSecrets;
+import pl.medflow.medflowbackend.infrastructure.secrets.AwsSecrets;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;

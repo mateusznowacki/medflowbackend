@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.aws.s3;
+package pl.medflow.medflowbackend.infrastructure.s3;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

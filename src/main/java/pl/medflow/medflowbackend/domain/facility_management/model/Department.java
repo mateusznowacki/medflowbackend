@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.entities;
+package pl.medflow.medflowbackend.domain.facility_management.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
