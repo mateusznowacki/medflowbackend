@@ -1,11 +1,10 @@
-package pl.medflow.medflowbackend.domain.identity.dto;
-
+package pl.medflow.medflowbackend.domain.identity.auth.dto;
 
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import pl.medflow.medflowbackend.domain.identity.dto.BasicUser;
+import pl.medflow.medflowbackend.domain.identity.user.dto.BasicUser;
 
 @Data
 @AllArgsConstructor

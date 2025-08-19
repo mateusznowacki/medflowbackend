@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.identity.dto;
+package pl.medflow.medflowbackend.domain.identity.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

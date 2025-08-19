@@ -3,16 +3,13 @@ package pl.medflow.medflowbackend.domain.patient_management.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.medflow.medflowbackend.domain.shared.enums.Role;
-import pl.medflow.medflowbackend.domain.identity.dto.PatientRegistrationRequest;
-import pl.medflow.medflowbackend.domain.identity.dto.UserResponse;
+import pl.medflow.medflowbackend.domain.patient_management.PatientRegistrationRequest;
+import pl.medflow.medflowbackend.domain.identity.auth.dto.UserResponse;
+import pl.medflow.medflowbackend.domain.identity.auth.repository.UserRepository;
 import pl.medflow.medflowbackend.domain.patient_management.model.Patient;
-import pl.medflow.medflowbackend.domain.identity.repository.UserRepository;
-import pl.medflow.medflowbackend.domain.identity.model.User;
+import pl.medflow.medflowbackend.domain.shared.enums.Role;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -50,18 +47,18 @@ public class PatientService {
         return mapToUserResponse(savedPatient);
     }
     
-    public List<UserResponse> getAllPatients() {
-        return userRepository.findAll().stream()
-                .filter(user -> user instanceof Patient)
-                .map(this::mapToUserResponse)
-                .toList();
-    }
+//    public List<UserResponse> getAllPatients() {
+//        return userRepository.findAll().stream()
+//                .filter(user -> user instanceof Patient)
+//                .map(this::mapToUserResponse)
+//                .toList();
+//    }
     
-    public Optional<UserResponse> getPatientById(String id) {
-        return userRepository.findById(id)
-                .filter(user -> user instanceof Patient)
-                .map(this::mapToUserResponse);
-    }
+//    public Optional<UserResponse> getPatientById(String id) {
+//        return userRepository.findById(id)
+//                .filter(user -> user instanceof Patient)
+//                .map(this::mapToUserResponse);
+//    }
     
     public List<UserResponse> getPatientsByDoctor(String doctorId) {
         return userRepository.findAll().stream()

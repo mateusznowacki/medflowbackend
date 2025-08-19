@@ -3,15 +3,13 @@ package pl.medflow.medflowbackend.domain.staff_management.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffRegistrationRequest;
+import pl.medflow.medflowbackend.domain.identity.auth.dto.UserResponse;
+import pl.medflow.medflowbackend.domain.identity.auth.repository.UserRepository;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
-import pl.medflow.medflowbackend.domain.identity.dto.MedicalStaffRegistrationRequest;
-import pl.medflow.medflowbackend.domain.identity.dto.UserResponse;
 import pl.medflow.medflowbackend.domain.staff_management.model.MedicalStaff;
-import pl.medflow.medflowbackend.domain.identity.repository.UserRepository;
-import pl.medflow.medflowbackend.domain.identity.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,19 +40,19 @@ public class MedicalStaffService {
         return mapToUserResponse(savedStaff);
     }
     
-    public List<UserResponse> getAllMedicalStaff() {
-        return userRepository.findAll().stream()
-                .filter(user -> user instanceof MedicalStaff)
-                .map(this::mapToUserResponse)
-                .toList();
-    }
-    
-    public Optional<UserResponse> getMedicalStaffById(String id) {
-        return userRepository.findById(id)
-                .filter(user -> user instanceof MedicalStaff)
-                .map(this::mapToUserResponse);
-    }
-    
+//    public List<UserResponse> getAllMedicalStaff() {
+//        return userRepository.findAll().stream()
+//                .filter(user -> user instanceof MedicalStaff)
+//                .map(this::mapToUserResponse)
+//                .toList();
+//    }
+//
+//    public Optional<UserResponse> getMedicalStaffById(String id) {
+//        return userRepository.findById(id)
+//                .filter(user -> user instanceof MedicalStaff)
+//                .map(this::mapToUserResponse);
+//    }
+//
     public List<UserResponse> getMedicalStaffByPosition(String position) {
         return userRepository.findAll().stream()
                 .filter(user -> user instanceof MedicalStaff)

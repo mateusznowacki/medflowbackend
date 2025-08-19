@@ -4,14 +4,19 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import pl.medflow.medflowbackend.domain.identity.dto.MedicalStaffRegistrationRequest;
-import pl.medflow.medflowbackend.domain.identity.dto.UserResponse;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffRegistrationRequest;
+import pl.medflow.medflowbackend.domain.identity.auth.dto.UserResponse;
 import pl.medflow.medflowbackend.domain.staff_management.service.MedicalStaffService;
-import pl.medflow.medflowbackend.domain.identity.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/medical-staff")
@@ -30,19 +35,19 @@ public class MedicalStaffController {
         }
     }
     
-    @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllMedicalStaff() {
-        List<UserResponse> staff = medicalStaffService.getAllMedicalStaff();
-        return ResponseEntity.ok(staff);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<UserResponse>> getAllMedicalStaff() {
+//        List<UserResponse> staff = medicalStaffService.getAllMedicalStaff();
+//        return ResponseEntity.ok(staff);
+//    }
     
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getMedicalStaffById(@PathVariable String id) {
-        Optional<UserResponse> staff = medicalStaffService.getMedicalStaffById(id);
-        return staff.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-    
+//    @GetMapping("/{id}")
+//    public ResponseEntity<UserResponse> getMedicalStaffById(@PathVariable String id) {
+//        Optional<UserResponse> staff = medicalStaffService.getMedicalStaffById(id);
+//        return staff.map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+//
     @GetMapping("/position/{position}")
     public ResponseEntity<List<UserResponse>> getMedicalStaffByPosition(@PathVariable String position) {
         List<UserResponse> staff = medicalStaffService.getMedicalStaffByPosition(position);

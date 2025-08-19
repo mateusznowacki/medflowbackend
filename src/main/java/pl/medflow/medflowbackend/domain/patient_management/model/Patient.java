@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import pl.medflow.medflowbackend.domain.shared.embedded.Address;
 import pl.medflow.medflowbackend.domain.shared.enums.Gender;
-import pl.medflow.medflowbackend.domain.identity.model.User;
+import pl.medflow.medflowbackend.domain.identity.user.model.User;
 
 import java.time.LocalDate;
 import java.time.Instant;
