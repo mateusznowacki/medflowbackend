@@ -20,10 +20,14 @@ public class MedicalProcedureService {
     public MedicalProcedure update(String id, MedicalProcedure proc) {
         MedicalProcedure existing = procedureRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Procedure not found"));
+
         existing.setName(proc.getName());
         existing.setDescription(proc.getDescription());
         existing.setDurationMinutes(proc.getDurationMinutes());
         existing.setActive(proc.isActive());
+        existing.setPrivateVisit(proc.isPrivateVisit());
+        existing.setPrice(proc.getPrice());
+
         return procedureRepo.save(existing);
     }
 
@@ -32,7 +36,8 @@ public class MedicalProcedureService {
     }
 
     public MedicalProcedure getById(String id) {
-        return procedureRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Procedure not found"));
+        return procedureRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Procedure not found"));
     }
 
     public List<MedicalProcedure> getAll() {

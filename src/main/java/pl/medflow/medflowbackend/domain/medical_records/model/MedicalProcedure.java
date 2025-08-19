@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Document(collection = "procedures")
@@ -22,17 +23,21 @@ public class MedicalProcedure {
     @Id
     private String id;
 
-    private String name;
-
     @Indexed(unique = true)
-    private String code;              // unikalny kod procedury (np. katalog NFZ/ICD)
+    private String code;              // unikalny kod procedury (np. NFZ/ICD)
 
-    private String description;       // opcjonalnie, krótki opis
+    private String name;              // nazwa procedury
+    private String description;       // opis (opcjonalny)
 
-    private int durationMinutes;      // czas trwania (używany przy slotach)
+    private int durationMinutes;      // czas trwania w minutach
 
     @Builder.Default
-    private boolean active = true;
+    private boolean active = true;    // czy dostępna w systemie
+
+    @Builder.Default
+    private boolean privateVisit = false; // czy dotyczy wizyt prywatnych
+
+    private BigDecimal price;         // cena (jeśli prywatna)
 
     @CreatedDate
     private Instant createdAt;

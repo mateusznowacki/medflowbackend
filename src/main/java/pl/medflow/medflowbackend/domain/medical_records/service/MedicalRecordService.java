@@ -20,11 +20,12 @@ public class MedicalRecordService {
     public MedicalRecord update(String id, MedicalRecord record) {
         MedicalRecord existing = recordRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Record not found"));
-        existing.setDiagnosis(record.getDiagnosis());
-        existing.setNotes(record.getNotes());
+
         existing.setVisitAt(record.getVisitAt());
         existing.setAppointmentId(record.getAppointmentId());
+        existing.setProcedureIds(record.getProcedureIds());
         existing.setDocumentIds(record.getDocumentIds());
+
         return recordRepo.save(existing);
     }
 

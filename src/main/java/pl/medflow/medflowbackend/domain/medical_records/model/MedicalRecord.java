@@ -23,7 +23,7 @@ import java.util.List;
 @Builder
 @CompoundIndexes({
         @CompoundIndex(name = "patient_visit_idx", def = "{ 'patientId': 1, 'visitAt': 1 }"),
-        @CompoundIndex(name = "doctor_visit_idx",  def = "{ 'doctorId': 1,  'visitAt': 1 }")
+        @CompoundIndex(name = "doctor_visit_idx", def = "{ 'doctorId': 1,  'visitAt': 1 }")
 })
 public class MedicalRecord {
 
@@ -40,8 +40,7 @@ public class MedicalRecord {
 
     private Instant visitAt;        // data/godzina wizyty (UTC)
 
-    private String diagnosis;       // rozpoznanie
-    private String notes;           // zalecenia/notatki
+    private List<String> procedureIds; // referencje do MedicalProcedure.id
 
     private List<String> documentIds; // referencje do MedicalDocument.id
 
