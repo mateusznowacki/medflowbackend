@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "app.jwt")
+@ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
     private Access access = new Access();
     private Refresh refresh = new Refresh();

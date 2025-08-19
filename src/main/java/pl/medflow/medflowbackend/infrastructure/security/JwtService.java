@@ -6,10 +6,11 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.medflow.medflowbackend.domain.identity.auth.model.RolePermissions;
+import pl.medflow.medflowbackend.domain.identity.auth.repository.RolePermissionsRepository;
 import pl.medflow.medflowbackend.domain.identity.user.model.User;
 import pl.medflow.medflowbackend.domain.shared.enums.Permission;
 import pl.medflow.medflowbackend.infrastructure.secrets.AwsSecrets;
-import pl.medflow.medflowbackend.domain.identity.auth.repository.RolePermissionsRepository;
 
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -46,29 +47,32 @@ public class JwtService {
         return cachedPublicKey = readPublicKeyFromPem(pem);
     }
 
-    // ==== ACCESS TOKEN (z permissions) ====
-    public String generateAccessToken(User user) {
-        Instant now = Instant.now();
-        Instant exp = now.plusSeconds(props.getAccess().getExpirationMinutes() * 60L);
+   // ==== ACCESS TOKEN (z permissions + basic user info) ====
+public String generateAccessToken(User user) {
+    Instant now = Instant.now();
+    Instant exp = now.plusSeconds(props.getAccess().getExpirationMinutes() * 60L);
 
-        // pobranie permissions z bazy na podstawie roli
-        List<Permission> perms = rolePermissionsRepo.findByRole(user.getRole())
-                .map(rp -> rp.getPermissions())
-                .orElse(List.of());
+    // pobranie permissions z bazy na podstawie roli
+    List<Permission> perms = rolePermissionsRepo.findByRole(user.getRole())
+            .map(RolePermissions::getPermissions)
+            .orElse(List.of());
 
-        return Jwts.builder()
-                .setIssuer(props.getAccess().getIssuer())
-                .setSubject(user.getId())
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(exp))
-                .addClaims(Map.of(
-                        "email", user.getEmail(),
-                        "role",  user.getRole().name(),
-                        "permissions", perms.stream().map(Enum::name).toList()
-                ))
-                .signWith(privateKey(), Jwts.SIG.RS256)
-                .compact();
-    }
+    return Jwts.builder()
+            .setIssuer(props.getAccess().getIssuer())
+            .setSubject(user.getId())
+            .setIssuedAt(Date.from(now))
+            .setExpiration(Date.from(exp))
+            .addClaims(Map.of(
+                    "email", user.getEmail(),
+                    "role",  user.getRole().name(),
+                    "firstName", user.getFirstName(),
+                    "lastName",  user.getLastName(),
+                    "permissions", perms.stream().map(Enum::name).toList()
+            ))
+            .signWith(privateKey(), Jwts.SIG.RS256)
+            .compact();
+}
+
 
     // ==== REFRESH TOKEN (lekki) ====
     public String generateRefreshToken(User user, String jti) {
