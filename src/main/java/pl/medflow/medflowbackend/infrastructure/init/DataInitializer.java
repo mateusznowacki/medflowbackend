@@ -9,7 +9,7 @@ import pl.medflow.medflowbackend.domain.doctor_management.model.Doctor;
 import pl.medflow.medflowbackend.domain.doctor_management.repository.DoctorRepository;
 import pl.medflow.medflowbackend.domain.identity.auth.model.Account;
 import pl.medflow.medflowbackend.domain.identity.auth.repository.AccountRepository;
-import pl.medflow.medflowbackend.domain.patient_management.PatientRepository;
+import pl.medflow.medflowbackend.domain.patient_management.repository.PatientRepository;
 import pl.medflow.medflowbackend.domain.patient_management.model.Patient;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
 import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffRepository;

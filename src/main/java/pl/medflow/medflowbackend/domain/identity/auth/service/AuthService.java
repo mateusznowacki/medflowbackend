@@ -13,7 +13,7 @@ import pl.medflow.medflowbackend.domain.identity.auth.model.RefreshTokenDocument
 import pl.medflow.medflowbackend.domain.identity.auth.repository.AccountRepository;
 import pl.medflow.medflowbackend.domain.identity.auth.repository.RefreshTokenRepository;
 import pl.medflow.medflowbackend.domain.identity.user.model.User;
-import pl.medflow.medflowbackend.domain.patient_management.PatientRepository;
+import pl.medflow.medflowbackend.domain.patient_management.repository.PatientRepository;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
 import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffRepository;
 import pl.medflow.medflowbackend.infrastructure.security.JwtProperties;

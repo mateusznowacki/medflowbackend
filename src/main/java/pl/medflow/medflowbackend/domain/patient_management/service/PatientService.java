@@ -1,133 +1,161 @@
 package pl.medflow.medflowbackend.domain.patient_management.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.medflow.medflowbackend.domain.identity.auth.model.Account;
+import pl.medflow.medflowbackend.domain.identity.auth.repository.AccountRepository;
+import pl.medflow.medflowbackend.domain.patient_management.dto.PatientConsentRequest;
+import pl.medflow.medflowbackend.domain.patient_management.dto.PatientCreateRequest;
+import pl.medflow.medflowbackend.domain.patient_management.dto.PatientMedicalUpdateRequest;
+import pl.medflow.medflowbackend.domain.patient_management.dto.PatientResponse;
+import pl.medflow.medflowbackend.domain.patient_management.dto.PatientSummaryResponse;
+import pl.medflow.medflowbackend.domain.patient_management.dto.PatientUpdateRequest;
+import pl.medflow.medflowbackend.domain.patient_management.model.Patient;
+import pl.medflow.medflowbackend.domain.patient_management.repository.PatientRepository;
+import pl.medflow.medflowbackend.domain.shared.enums.Role;
+
+import java.time.Instant;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class PatientService {
-    
-//    private final UserRepository userRepository;
-//    private final PasswordEncoder passwordEncoder;
-//
-//    public UserResponse registerPatient(PatientRegistrationRequest request) {
-//        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-//            throw new RuntimeException("Patient with this email already exists");
-//        }
-//
-//        Patient patient = Patient.builder()
-//                .firstName(request.getFirstName())
-//                .lastName(request.getLastName())
-//                .email(request.getEmail())
-//                .password(passwordEncoder.encode(request.getPassword()))
-//                .phoneNumber(request.getPhoneNumber())
-//                .role(Role.PATIENT)
-//                .nationalId(request.getNationalId())
-//                .gender(request.getGender())
-//                .dateOfBirth(request.getDateOfBirth())
-//                .address(request.getAddress())
-//                .emergencyContactName(request.getEmergencyContactName())
-//                .emergencyContactPhone(request.getEmergencyContactPhone())
-//                .consentGiven(request.getConsentGiven() != null ? request.getConsentGiven() : false)
-//                .allergies(request.getAllergies())
-//                .medications(request.getMedications())
-//                .chronicDiseases(request.getChronicDiseases())
-//                .familyDoctorId(request.getFamilyDoctorId())
-//                .build();
-//
-//        Patient savedPatient = userRepository.save(patient);
-//        return mapToUserResponse(savedPatient);
-//    }
-//
-////    public List<UserResponse> getAllPatients() {
-////        return userRepository.findAll().stream()
-////                .filter(user -> user instanceof Patient)
-////                .map(this::mapToUserResponse)
-////                .toList();
-////    }
-//
-////    public Optional<UserResponse> getPatientById(String id) {
-////        return userRepository.findById(id)
-////                .filter(user -> user instanceof Patient)
-////                .map(this::mapToUserResponse);
-////    }
-//
-//    public List<UserResponse> getPatientsByDoctor(String doctorId) {
-//        return userRepository.findAll().stream()
-//                .filter(user -> user instanceof Patient)
-//                .map(user -> (Patient) user)
-//                .filter(patient -> doctorId.equals(patient.getFamilyDoctorId()))
-//                .map(this::mapToUserResponse)
-//                .toList();
-//    }
-//
-//    public UserResponse updatePatient(String id, PatientRegistrationRequest request) {
-//        Patient existingPatient = (Patient) userRepository.findById(id)
-//                .filter(user -> user instanceof Patient)
-//                .orElseThrow(() -> new RuntimeException("Patient not found"));
-//
-//        existingPatient.setFirstName(request.getFirstName());
-//        existingPatient.setLastName(request.getLastName());
-//        existingPatient.setPhoneNumber(request.getPhoneNumber());
-//
-//        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-//            existingPatient.setPassword(passwordEncoder.encode(request.getPassword()));
-//        }
-//
-//        existingPatient.setNationalId(request.getNationalId());
-//        existingPatient.setGender(request.getGender());
-//        existingPatient.setDateOfBirth(request.getDateOfBirth());
-//        existingPatient.setAddress(request.getAddress());
-//        existingPatient.setEmergencyContactName(request.getEmergencyContactName());
-//        existingPatient.setEmergencyContactPhone(request.getEmergencyContactPhone());
-//        if (request.getConsentGiven() != null) {
-//            existingPatient.setConsentGiven(request.getConsentGiven());
-//        }
-//        existingPatient.setAllergies(request.getAllergies());
-//        existingPatient.setMedications(request.getMedications());
-//        existingPatient.setChronicDiseases(request.getChronicDiseases());
-//        existingPatient.setFamilyDoctorId(request.getFamilyDoctorId());
-//
-//        Patient savedPatient = userRepository.save(existingPatient);
-//        return mapToUserResponse(savedPatient);
-//    }
-//
-//    public void deletePatient(String id) {
-//        Patient patient = (Patient) userRepository.findById(id)
-//                .filter(user -> user instanceof Patient)
-//                .orElseThrow(() -> new RuntimeException("Patient not found"));
-//        userRepository.delete(patient);
-//    }
-//
-//    private UserResponse mapToUserResponse(Patient patient) {
-//        UserResponse response = new UserResponse();
-//        response.setId(patient.getId());
-//        response.setFirstName(patient.getFirstName());
-//        response.setLastName(patient.getLastName());
-//        response.setEmail(patient.getEmail());
-//        response.setPhoneNumber(patient.getPhoneNumber());
-//        response.setRole(patient.getRole());
-//        response.setActive(patient.isActive());
-//        response.setEmailVerified(patient.isEmailVerified());
-//        response.setLastLoginAt(patient.getLastLoginAt());
-//        response.setCreatedAt(patient.getCreatedAt());
-//        response.setUpdatedAt(patient.getUpdatedAt());
-//
-//        // Patient specific fields
-//        response.setNationalId(patient.getNationalId());
-//        response.setGender(patient.getGender());
-//        response.setDateOfBirth(patient.getDateOfBirth());
-//        response.setAddress(patient.getAddress());
-//        response.setEmergencyContactName(patient.getEmergencyContactName());
-//        response.setEmergencyContactPhone(patient.getEmergencyContactPhone());
-//        response.setConsentGiven(patient.isConsentGiven());
-//        response.setTermsAcceptedAt(patient.getTermsAcceptedAt());
-//        response.setPrivacyPolicyAcceptedAt(patient.getPrivacyPolicyAcceptedAt());
-//        response.setAllergies(patient.getAllergies());
-//        response.setMedications(patient.getMedications());
-//        response.setChronicDiseases(patient.getChronicDiseases());
-//        response.setFamilyDoctorId(patient.getFamilyDoctorId());
-//
-//        return response;
-//    }
-} 
+
+    private final PatientRepository patientRepo;
+    private final AccountRepository accountRepo;
+    private final PasswordEncoder passwordEncoder;
+
+    // === CREATE ===
+    public PatientResponse create(PatientCreateRequest req) {
+        Patient patient = Patient.builder()
+                .firstName(req.firstName())
+                .lastName(req.lastName())
+                .email(req.email())
+                .password(passwordEncoder.encode(req.password()))
+                .phoneNumber(req.phoneNumber())
+                .role(Role.PATIENT)
+                .active(true)
+                .emailVerified(false)
+                .nationalId(req.nationalId())
+                .gender(req.gender())
+                .dateOfBirth(req.dateOfBirth())
+                .address(req.address())
+                .emergencyContactName(req.emergencyContactName())
+                .emergencyContactPhone(req.emergencyContactPhone())
+                .consentGiven(Boolean.TRUE.equals(req.consentGiven()))
+                .allergies(req.allergies())
+                .medications(req.medications())
+                .chronicDiseases(req.chronicDiseases())
+                .familyDoctorId(req.familyDoctorId())
+                .build();
+
+        Patient saved = patientRepo.save(patient);
+
+        // Tworzymy konto logowania
+        accountRepo.save(Account.builder()
+                .id(saved.getId())
+                .email(saved.getEmail())
+                .passwordHash(saved.getPassword())
+                .role(Role.PATIENT)
+                .build());
+
+        return toResponse(saved);
+    }
+
+    // === UPDATE danych ogólnych ===
+    public PatientResponse update(String id, PatientUpdateRequest req) {
+        Patient patient = patientRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+
+        if (req.firstName() != null) patient.setFirstName(req.firstName());
+        if (req.lastName() != null) patient.setLastName(req.lastName());
+        if (req.phoneNumber() != null) patient.setPhoneNumber(req.phoneNumber());
+        if (req.nationalId() != null) patient.setNationalId(req.nationalId());
+        if (req.gender() != null) patient.setGender(req.gender());
+        if (req.dateOfBirth() != null) patient.setDateOfBirth(req.dateOfBirth());
+        if (req.address() != null) patient.setAddress(req.address());
+        if (req.emergencyContactName() != null) patient.setEmergencyContactName(req.emergencyContactName());
+        if (req.emergencyContactPhone() != null) patient.setEmergencyContactPhone(req.emergencyContactPhone());
+        if (req.allergies() != null) patient.setAllergies(req.allergies());
+        if (req.medications() != null) patient.setMedications(req.medications());
+        if (req.chronicDiseases() != null) patient.setChronicDiseases(req.chronicDiseases());
+        if (req.familyDoctorId() != null) patient.setFamilyDoctorId(req.familyDoctorId());
+
+        Patient updated = patientRepo.save(patient);
+        return toResponse(updated);
+    }
+
+    // === UPDATE danych medycznych ===
+    public PatientResponse updateMedical(String id, PatientMedicalUpdateRequest req) {
+        Patient patient = patientRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+
+        if (req.allergies() != null) patient.setAllergies(req.allergies());
+        if (req.medications() != null) patient.setMedications(req.medications());
+        if (req.chronicDiseases() != null) patient.setChronicDiseases(req.chronicDiseases());
+
+        Patient updated = patientRepo.save(patient);
+        return toResponse(updated);
+    }
+
+    // === UPDATE zgód ===
+    public PatientResponse updateConsents(String id, PatientConsentRequest req) {
+        Patient patient = patientRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+
+        patient.setConsentGiven(req.consentGiven());
+
+        if (req.termsAccepted()) {
+            patient.setTermsAcceptedAt(Instant.now());
+        }
+        if (req.privacyPolicyAccepted()) {
+            patient.setPrivacyPolicyAcceptedAt(Instant.now());
+        }
+
+        Patient updated = patientRepo.save(patient);
+        return toResponse(updated);
+    }
+
+    // === GET jeden pacjent ===
+    public PatientResponse getById(String id) {
+        return patientRepo.findById(id)
+                .map(this::toResponse)
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+    }
+
+    // === GET lista pacjentów (lekki DTO) ===
+    public List<PatientSummaryResponse> getAllSummaries() {
+        return patientRepo.findAll().stream()
+                .map(p -> new PatientSummaryResponse(
+                        p.getId(),
+                        p.getFirstName(),
+                        p.getLastName(),
+                        p.getEmail(),
+                        p.getPhoneNumber()
+                ))
+                .toList();
+    }
+
+    // === helper: mapowanie encji -> DTO ===
+    private PatientResponse toResponse(Patient p) {
+        return new PatientResponse(
+                p.getId(),
+                p.getFirstName(),
+                p.getLastName(),
+                p.getEmail(),
+                p.getPhoneNumber(),
+                p.getNationalId(),
+                p.getGender(),
+                p.getDateOfBirth(),
+                p.getAddress(),
+                p.getEmergencyContactName(),
+                p.getEmergencyContactPhone(),
+                p.isConsentGiven(),
+                p.getAllergies(),
+                p.getMedications(),
+                p.getChronicDiseases(),
+                p.getFamilyDoctorId()
+        );
+    }
+}
