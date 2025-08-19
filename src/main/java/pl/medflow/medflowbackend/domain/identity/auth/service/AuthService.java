@@ -1,4 +1,3 @@
-// domain/identity/auth/service/AuthService.java
 package pl.medflow.medflowbackend.domain.identity.auth.service;
 
 import lombok.RequiredArgsConstructor;
@@ -11,10 +10,13 @@ import pl.medflow.medflowbackend.domain.identity.auth.dto.LoginRequest;
 import pl.medflow.medflowbackend.domain.identity.auth.dto.LoginResponse;
 import pl.medflow.medflowbackend.domain.identity.auth.model.Account;
 import pl.medflow.medflowbackend.domain.identity.auth.model.RefreshTokenDocument;
+import pl.medflow.medflowbackend.domain.identity.auth.model.RolePermissions;
 import pl.medflow.medflowbackend.domain.identity.auth.repository.AccountRepository;
 import pl.medflow.medflowbackend.domain.identity.auth.repository.RefreshTokenRepository;
+import pl.medflow.medflowbackend.domain.identity.auth.repository.RolePermissionsRepository;
 import pl.medflow.medflowbackend.domain.identity.user.model.User;
 import pl.medflow.medflowbackend.domain.patient_management.PatientRepository;
+import pl.medflow.medflowbackend.domain.shared.enums.Permission;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
 import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffRepository;
 import pl.medflow.medflowbackend.infrastructure.security.JwtProperties;
@@ -22,6 +24,7 @@ import pl.medflow.medflowbackend.infrastructure.security.JwtService;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,8 @@ public class AuthService {
     private final DoctorRepository doctorRepo;
     private final PatientRepository patientRepo;
     private final MedicalStaffRepository staffRepo;
+    private final RolePermissionsRepository rolePermsRepo;
+
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenRepository refreshRepo;
@@ -47,10 +52,15 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid credentials");
         }
 
-        User user = loadUserFor(acc); // dociągnij profil według roli i ID
+        User user = loadUserFor(acc);
 
-        String access = jwtService.generateAccessToken(user);
+        // pobierz uprawnienia dla roli
+        List<Permission> permissions = loadPermissionsFor(user.getRole());
 
+        // Access token
+        String access = jwtService.generateAccessToken(user, permissions);
+
+        // Refresh token
         String jti = jwtService.newJti();
         Instant refreshExp = Instant.now().plus(Duration.ofDays(props.getRefresh().getExpirationDays()));
         refreshRepo.save(RefreshTokenDocument.builder()
@@ -63,7 +73,7 @@ public class AuthService {
         String refresh = jwtService.generateRefreshToken(user, jti);
 
         return new LoginResult(
-                toLoginResponse(user, access),
+                toLoginResponse(user, permissions, access),
                 buildRefreshCookie(refresh, refreshMaxAgeSeconds())
         );
     }
@@ -86,14 +96,15 @@ public class AuthService {
         doc.setRevoked(true);
         refreshRepo.save(doc);
 
-        // znajdź konto po userId (id konta == id profilu)
         Account acc = accountRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
 
         User user = loadUserFor(acc);
+        List<Permission> permissions = loadPermissionsFor(user.getRole());
 
-        String access = jwtService.generateAccessToken(user);
+        String access = jwtService.generateAccessToken(user, permissions);
 
+        // nowy refresh
         String newJti = jwtService.newJti();
         Instant refreshExp = Instant.now().plus(Duration.ofDays(props.getRefresh().getExpirationDays()));
         refreshRepo.save(RefreshTokenDocument.builder()
@@ -109,7 +120,7 @@ public class AuthService {
         String newRefresh = jwtService.generateRefreshToken(user, newJti);
 
         return new RefreshResult(
-                toLoginResponse(user, access),
+                toLoginResponse(user, permissions, access),
                 buildRefreshCookie(newRefresh, refreshMaxAgeSeconds())
         );
     }
@@ -125,7 +136,7 @@ public class AuthService {
                 });
             }
         } catch (Exception ignored) { }
-        return buildRefreshCookie("", 0); // clear
+        return buildRefreshCookie("", 0);
     }
 
     // ==== helpers ====
@@ -140,7 +151,13 @@ public class AuthService {
         };
     }
 
-    private LoginResponse toLoginResponse(User user, String accessToken) {
+    private List<Permission> loadPermissionsFor(Role role) {
+        RolePermissions perms = rolePermsRepo.findByRole(role)
+                .orElseThrow(() -> new IllegalStateException("No permissions configured for role " + role));
+        return perms.getPermissions();
+    }
+
+    private LoginResponse toLoginResponse(User user, List<Permission> permissions, String accessToken) {
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .expiresIn(props.getAccess().getExpirationMinutes() * 60L)
@@ -151,6 +168,7 @@ public class AuthService {
                         .lastName(user.getLastName())
                         .email(user.getEmail())
                         .build())
+                .permissions(permissions) // <<<<<<<<<<<<
                 .build();
     }
 

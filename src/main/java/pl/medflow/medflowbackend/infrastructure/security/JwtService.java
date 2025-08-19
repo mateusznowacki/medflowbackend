@@ -7,7 +7,9 @@ import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.medflow.medflowbackend.domain.identity.user.model.User;
+import pl.medflow.medflowbackend.domain.shared.enums.Permission;
 import pl.medflow.medflowbackend.infrastructure.secrets.AwsSecrets;
+import pl.medflow.medflowbackend.domain.identity.auth.repository.RolePermissionsRepository;
 
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -17,6 +19,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,30 +29,32 @@ public class JwtService {
 
     private final JwtProperties props;
     private final AwsSecrets secrets;
+    private final RolePermissionsRepository rolePermissionsRepo;
 
-    // Prosty cache kluczy (w razie rotacji możesz przeładować na żądanie)
     private volatile PrivateKey cachedPrivateKey;
     private volatile PublicKey  cachedPublicKey;
 
     private PrivateKey privateKey() {
-        PrivateKey k = cachedPrivateKey;
-        if (k != null) return k;
+        if (cachedPrivateKey != null) return cachedPrivateKey;
         String pem = notBlank(secrets.getJwtPrivateKeyPem(), "JWT private key is empty");
-        cachedPrivateKey = k = readPrivateKeyFromPem(pem);
-        return k;
+        return cachedPrivateKey = readPrivateKeyFromPem(pem);
     }
 
     private PublicKey publicKey() {
-        PublicKey k = cachedPublicKey;
-        if (k != null) return k;
+        if (cachedPublicKey != null) return cachedPublicKey;
         String pem = notBlank(secrets.getJwtPublicKeyPem(), "JWT public key is empty");
-        cachedPublicKey = k = readPublicKeyFromPem(pem);
-        return k;
+        return cachedPublicKey = readPublicKeyFromPem(pem);
     }
 
+    // ==== ACCESS TOKEN (z permissions) ====
     public String generateAccessToken(User user) {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(props.getAccess().getExpirationMinutes() * 60L);
+
+        // pobranie permissions z bazy na podstawie roli
+        List<Permission> perms = rolePermissionsRepo.findByRole(user.getRole())
+                .map(rp -> rp.getPermissions())
+                .orElse(List.of());
 
         return Jwts.builder()
                 .setIssuer(props.getAccess().getIssuer())
@@ -58,12 +63,14 @@ public class JwtService {
                 .setExpiration(Date.from(exp))
                 .addClaims(Map.of(
                         "email", user.getEmail(),
-                        "role",  user.getRole().name()
+                        "role",  user.getRole().name(),
+                        "permissions", perms.stream().map(Enum::name).toList()
                 ))
                 .signWith(privateKey(), Jwts.SIG.RS256)
                 .compact();
     }
 
+    // ==== REFRESH TOKEN (lekki) ====
     public String generateRefreshToken(User user, String jti) {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(props.getRefresh().getExpirationDays() * 24L * 3600L);
@@ -71,7 +78,7 @@ public class JwtService {
         return Jwts.builder()
                 .setIssuer(props.getRefresh().getIssuer())
                 .setSubject(user.getId())
-                .setId(jti) // id dokumentu refresh w Mongo
+                .setId(jti)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(exp))
                 .claim("typ", "refresh")
@@ -79,6 +86,7 @@ public class JwtService {
                 .compact();
     }
 
+    // ==== PARSOWANIE ====
     public Jws<Claims> parse(String jwt) {
         return Jwts.parser()
                 .verifyWith(publicKey())
@@ -91,12 +99,11 @@ public class JwtService {
     public boolean isExpired(String jwt)  { return parse(jwt).getPayload().getExpiration().before(new Date()); }
     public String newJti()                { return UUID.randomUUID().toString(); }
 
-    // ===== helpers =====
+    // ==== HELPERS ====
     private static PrivateKey readPrivateKeyFromPem(String pem) {
         try {
             byte[] der = base64Body(pem, "-----BEGIN PRIVATE KEY-----", "-----END PRIVATE KEY-----");
-            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(der);
-            return KeyFactory.getInstance("RSA").generatePrivate(spec);
+            return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(der));
         } catch (Exception e) {
             throw new IllegalStateException("Invalid RSA private key (PKCS#8)", e);
         }
@@ -105,17 +112,14 @@ public class JwtService {
     private static PublicKey readPublicKeyFromPem(String pem) {
         try {
             byte[] der = base64Body(pem, "-----BEGIN PUBLIC KEY-----", "-----END PUBLIC KEY-----");
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(der);
-            return KeyFactory.getInstance("RSA").generatePublic(spec);
+            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(der));
         } catch (Exception e) {
             throw new IllegalStateException("Invalid RSA public key (X.509)", e);
         }
     }
 
     private static byte[] base64Body(String pem, String begin, String end) {
-        String s = pem.replace(begin, "")
-                      .replace(end, "")
-                      .replaceAll("\\s", "");
+        String s = pem.replace(begin, "").replace(end, "").replaceAll("\\s", "");
         return Base64.getDecoder().decode(s);
     }
 
