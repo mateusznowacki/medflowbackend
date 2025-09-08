@@ -1,0 +1,32 @@
+aws:
+  profile-name: medflow
+  region: eu-west-1
+  secret-name: medflow/backend/config
+
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27018
+      database: medflow
+
+logging:
+  level:
+    org:
+      springframework:
+        web: ERROR
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+
+jwt:
+  access:
+    expirationMinutes: 15
+    issuer: medflow-access
+  refresh:
+    expirationDays: 7
+    issuer: medflow-refresh
+  cookie:
+    name: refresh_token
+    path: /
+    sameSite: Strict
+    secure: false

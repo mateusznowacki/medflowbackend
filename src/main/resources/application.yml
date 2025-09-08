@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: medflowbackend
+  profiles:
+    active: dev
+
+server:
+  port: 8080
