@@ -1,69 +1,78 @@
 package pl.medflow.medflowbackend.domain.staff_management.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffRegistrationRequest;
+import pl.medflow.medflowbackend.domain.staff_management.StaffResponse;
+import pl.medflow.medflowbackend.domain.staff_management.service.MedicalStaffService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/medical-staff")
 @RequiredArgsConstructor
 public class MedicalStaffController {
-    
-//    private final MedicalStaffService medicalStaffService;
-//
-//    @PostMapping("/register")
-//    public ResponseEntity<UserResponse> registerMedicalStaff(@Valid @RequestBody MedicalStaffRegistrationRequest request) {
-//        try {
-//            UserResponse staff = medicalStaffService.registerMedicalStaff(request);
-//            return ResponseEntity.status(HttpStatus.CREATED).body(staff);
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.badRequest().build();
-//        }
-//    }
-//
-////    @GetMapping
-////    public ResponseEntity<List<UserResponse>> getAllMedicalStaff() {
-////        List<UserResponse> staff = medicalStaffService.getAllMedicalStaff();
-////        return ResponseEntity.ok(staff);
-////    }
-//
-////    @GetMapping("/{id}")
-////    public ResponseEntity<UserResponse> getMedicalStaffById(@PathVariable String id) {
-////        Optional<UserResponse> staff = medicalStaffService.getMedicalStaffById(id);
-////        return staff.map(ResponseEntity::ok)
-////                .orElse(ResponseEntity.notFound().build());
-////    }
-////
-//    @GetMapping("/position/{position}")
-//    public ResponseEntity<List<UserResponse>> getMedicalStaffByPosition(@PathVariable String position) {
-//        List<UserResponse> staff = medicalStaffService.getMedicalStaffByPosition(position);
-//        return ResponseEntity.ok(staff);
-//    }
-//
-//    @GetMapping("/department/{department}")
-//    public ResponseEntity<List<UserResponse>> getMedicalStaffByDepartment(@PathVariable String department) {
-//        List<UserResponse> staff = medicalStaffService.getMedicalStaffByDepartment(department);
-//        return ResponseEntity.ok(staff);
-//    }
-//
-//    @PutMapping("/{id}")
-//    public ResponseEntity<UserResponse> updateMedicalStaff(@PathVariable String id,
-//                                                       @Valid @RequestBody MedicalStaffRegistrationRequest request) {
-//        try {
-//            UserResponse staff = medicalStaffService.updateMedicalStaff(id, request);
-//            return ResponseEntity.ok(staff);
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteMedicalStaff(@PathVariable String id) {
-//        try {
-//            medicalStaffService.deleteMedicalStaff(id);
-//            return ResponseEntity.noContent().build();
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
-} 
+
+    private final MedicalStaffService medicalStaffService;
+
+    @PostMapping("/register")
+    public ResponseEntity<StaffResponse> registerMedicalStaff(@Valid @RequestBody MedicalStaffRegistrationRequest request) {
+        try {
+            StaffResponse staff = medicalStaffService.registerMedicalStaff(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(staff);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<StaffResponse>> getAllMedicalStaff() {
+        List<StaffResponse> staff = medicalStaffService.getAllMedicalStaff();
+        return ResponseEntity.ok(staff);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<StaffResponse> getMedicalStaffById(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(medicalStaffService.getMedicalStaffById(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/position/{position}")
+    public ResponseEntity<List<StaffResponse>> getMedicalStaffByPosition(@PathVariable String position) {
+        List<StaffResponse> staff = medicalStaffService.getMedicalStaffByPosition(position);
+        return ResponseEntity.ok(staff);
+    }
+
+    @GetMapping("/department/{department}")
+    public ResponseEntity<List<StaffResponse>> getMedicalStaffByDepartment(@PathVariable String department) {
+        List<StaffResponse> staff = medicalStaffService.getMedicalStaffByDepartment(department);
+        return ResponseEntity.ok(staff);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<StaffResponse> updateMedicalStaff(@PathVariable String id,
+                                                            @Valid @RequestBody MedicalStaffRegistrationRequest request) {
+        try {
+            StaffResponse staff = medicalStaffService.updateMedicalStaff(id, request);
+            return ResponseEntity.ok(staff);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMedicalStaff(@PathVariable String id) {
+        try {
+            medicalStaffService.deleteMedicalStaff(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
