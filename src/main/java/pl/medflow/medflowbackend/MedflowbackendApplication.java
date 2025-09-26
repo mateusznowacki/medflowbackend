@@ -3,14 +3,15 @@ package pl.medflow.medflowbackend;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.data.mongodb.config.EnableMongoAuditing;
 
 
-
-@SpringBootApplication(exclude = { UserDetailsServiceAutoConfiguration.class })
+@SpringBootApplication(exclude = {UserDetailsServiceAutoConfiguration.class})
+@EnableMongoAuditing
 public class MedflowbackendApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MedflowbackendApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MedflowbackendApplication.class, args);
+    }
 
 }

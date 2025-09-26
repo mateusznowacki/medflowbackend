@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.medflow.medflowbackend.domain.identity.auth.model.Account;
 import pl.medflow.medflowbackend.domain.identity.auth.repository.AccountRepository;
+import pl.medflow.medflowbackend.domain.identity.auth.service.AccountService;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
 import pl.medflow.medflowbackend.domain.staff_management.dto.MedicalStaffRegistrationRequestDto;
 import pl.medflow.medflowbackend.domain.staff_management.dto.MedicalStaffResponseDto;
@@ -13,14 +14,13 @@ import pl.medflow.medflowbackend.domain.staff_management.model.MedicalStaffPosit
 import pl.medflow.medflowbackend.domain.staff_management.repository.MedicalStaffRepository;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class MedicalStaffService {
 
     private final MedicalStaffRepository staffRepo;
-    private final AccountRepository accountRepo;
+    private final AccountService accountService;
 
     // CREATE / REGISTER
     public MedicalStaffResponseDto registerMedicalStaff(MedicalStaffRegistrationRequestDto request) {
@@ -28,15 +28,8 @@ public class MedicalStaffService {
             throw new IllegalArgumentException("Medical staff with this email already exists");
         }
 
-        String id = UUID.randomUUID().toString();
-
-        Account account = Account.builder()
-                .id(id)
-                .email(request.email())
-                .passwordHash(request.password())
-                .role(Role.MEDICAL_STAFF)
-                .build();
-        accountRepo.save(account);
+        var account = accountService.create(request.email(), request.password(), Role.MEDICAL_STAFF);
+        var id = account.getId();
 
         MedicalStaff staff = MedicalStaff.builder()
                 .id(id)
@@ -100,7 +93,7 @@ public class MedicalStaffService {
         MedicalStaff existing = staffRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Medical staff not found"));
 
-        if(request.email() != null) {
+        if (request.email() != null) {
             if (!request.email().equalsIgnoreCase(existing.getEmail()) && accountRepo.existsByEmail(request.email())) {
                 throw new IllegalArgumentException("Email already in use");
             }
@@ -110,11 +103,11 @@ public class MedicalStaffService {
             acc.setEmail(request.email());
             accountRepo.save(acc);
         }
-        if(request.phoneNumber() != null) existing.setPhoneNumber(request.phoneNumber());
-        if(request.position() != null) existing.setPosition(request.position());
-        if(request.department() != null) existing.setDepartment(request.department());
-        if(request.assignedRoom() != null) existing.setAssignedRoom(request.assignedRoom());
-        if(request.licenseNumber() != null) existing.setLicenseNumber(request.licenseNumber());
+        if (request.phoneNumber() != null) existing.setPhoneNumber(request.phoneNumber());
+        if (request.position() != null) existing.setPosition(request.position());
+        if (request.department() != null) existing.setDepartment(request.department());
+        if (request.assignedRoom() != null) existing.setAssignedRoom(request.assignedRoom());
+        if (request.licenseNumber() != null) existing.setLicenseNumber(request.licenseNumber());
 
         MedicalStaff saved = staffRepo.save(existing);
         return toResponse(saved);
@@ -130,10 +123,8 @@ public class MedicalStaffService {
 
     // DELETE
     public void deleteMedicalStaff(String id) {
-        MedicalStaff staff = staffRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Medical staff not found"));
-        staffRepo.delete(staff);
-        accountRepo.deleteById(id);
+       staffRepo.deleteById(id);
+        accountService.deleteById(id);
     }
 
     private MedicalStaffResponseDto toResponse(MedicalStaff medicalStaff) {

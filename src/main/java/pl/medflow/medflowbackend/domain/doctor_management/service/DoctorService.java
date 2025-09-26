@@ -38,7 +38,7 @@ public class DoctorService {
                 .firstName(req.getFirstName())
                 .lastName(req.getLastName())
                 .email(req.getEmail())
-                .password(passwordEncoder.encode(req.getPassword()))
+                //.password(passwordEncoder.encode(req.getPassword()))
                 .phoneNumber(req.getPhoneNumber())
                 .role(Role.DOCTOR)
                 .licenseNumber(req.getLicenseNumber())
@@ -55,7 +55,7 @@ public class DoctorService {
         accountRepo.save(Account.builder()
                 .id(saved.getId())
                 .email(saved.getEmail())
-                .passwordHash(saved.getPassword())
+             //   .passwordHash(saved.getPassword())
                 .role(Role.DOCTOR)
                 .build());
 
@@ -110,7 +110,7 @@ public class DoctorService {
 
         if (req.getPassword() != null && !req.getPassword().isEmpty()) {
             String encoded = passwordEncoder.encode(req.getPassword());
-            existing.setPassword(encoded);
+          //  existing.setPassword(encoded);
             // update account password as well
             accountRepo.findById(id).ifPresent(acc -> {
                 acc.setPasswordHash(encoded);

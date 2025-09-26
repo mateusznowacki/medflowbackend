@@ -9,4 +9,8 @@ public interface AccountRepository extends MongoRepository<Account, String> {
     Optional<Account> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    void deleteByEmail(String email);
+
+    void deleteById(String email);
 }

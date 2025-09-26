@@ -32,7 +32,7 @@ public class PatientService {
                 .firstName(req.firstName())
                 .lastName(req.lastName())
                 .email(req.email())
-                .password(passwordEncoder.encode(req.password()))
+             //   .password(passwordEncoder.encode(req.password()))
                 .phoneNumber(req.phoneNumber())
                 .role(Role.PATIENT)
                 .active(true)
@@ -56,7 +56,7 @@ public class PatientService {
         accountRepo.save(Account.builder()
                 .id(saved.getId())
                 .email(saved.getEmail())
-                .passwordHash(saved.getPassword())
+             //   .passwordHash(saved.getPassword())
                 .role(Role.PATIENT)
                 .build());
 

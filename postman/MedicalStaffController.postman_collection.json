@@ -1,0 +1,265 @@
+{
+  "info": {
+    "_postman_id": "d4d7bb6f-9a5c-4f0a-9d81-4a1e55a0c9e1",
+    "name": "MedFlow Backend - MedicalStaff Controller",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Zbiór zapytań Postman do testowania kontrolera Medical Staff (/api/medical-staff)."
+  },
+  "item": [
+    {
+      "name": "Medical Staff",
+      "item": [
+        {
+          "name": "Register medical staff",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medical-staff/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medical-staff",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Anna\",\n  \"lastName\": \"Kowalska\",\n  \"email\": \"anna.kowalska@example.com\",\n  \"password\": \"password123!\",\n  \"phoneNumber\": \"+48 600 700 800\",\n  \"position\": \"NURSE\",\n  \"department\": \"Pediatria\",\n  \"assignedRoom\": {\n    \"building\": \"A\",\n    \"floor\": \"2\",\n    \"roomNumber\": \"205\"\n  },\n  \"licenseNumber\": \"NUR-PL-123456\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 201 CREATED\", function () { pm.response.to.have.status(201); });",
+                  "try {",
+                  "  var json = pm.response.json();",
+                  "  if (json && json.id) {",
+                  "    pm.collectionVariables.set('createdId', json.id);",
+                  "    pm.collectionVariables.set('id', json.id);",
+                  "  }",
+                  "} catch(e) { /* ignore if not json */ }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Get all medical staff",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medical-staff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medical-staff"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get medical staff by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medical-staff/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medical-staff",
+                "{{id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get medical staff by position",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medical-staff/position/{{position}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medical-staff",
+                "position",
+                "{{position}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get medical staff by department",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medical-staff/department/{{department}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medical-staff",
+                "department",
+                "{{department}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update medical staff",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medical-staff/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medical-staff",
+                "{{id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"anna.new@example.com\",\n  \"phoneNumber\": \"+48 600 700 801\",\n  \"position\": \"RECEPTIONIST\",\n  \"department\": \"Rejestracja\",\n  \"assignedRoom\": {\n    \"building\": \"B\",\n    \"floor\": \"0\",\n    \"roomNumber\": \"R1\"\n  },\n  \"licenseNumber\": \"REC-PL-654321\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete medical staff",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medical-staff/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medical-staff",
+                "{{id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "description": "Opcjonalny token Bearer jeśli aplikacja wymaga autoryzacji."
+    },
+    {
+      "key": "id",
+      "value": "{{createdId}}",
+      "description": "ID pracownika medycznego (możesz wstawić ręcznie lub użyć z testów)."
+    },
+    {
+      "key": "position",
+      "value": "NURSE"
+    },
+    {
+      "key": "department",
+      "value": "Pediatria"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": []
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": []
+      }
+    }
+  ]
+}
