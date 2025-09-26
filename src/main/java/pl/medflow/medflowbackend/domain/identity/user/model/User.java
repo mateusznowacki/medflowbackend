@@ -42,12 +42,6 @@ public abstract class User {
     @Pattern(regexp = "^[0-9+\\- ]{7,15}$", message = "Invalid phone number format")
     private String phoneNumber;
 
-    /**
-     * Password should always be stored as a hash (e.g., BCrypt).
-     */
-    @NotBlank
-    private String password;
-
     private boolean active = true;
 
     private boolean emailVerified = false;

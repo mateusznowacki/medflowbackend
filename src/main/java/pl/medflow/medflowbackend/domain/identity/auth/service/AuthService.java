@@ -15,7 +15,7 @@ import pl.medflow.medflowbackend.domain.identity.auth.repository.RefreshTokenRep
 import pl.medflow.medflowbackend.domain.identity.user.model.User;
 import pl.medflow.medflowbackend.domain.patient_management.repository.PatientRepository;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
-import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffRepository;
+import pl.medflow.medflowbackend.domain.staff_management.repository.MedicalStaffRepository;
 import pl.medflow.medflowbackend.infrastructure.security.JwtProperties;
 import pl.medflow.medflowbackend.infrastructure.security.JwtService;
 

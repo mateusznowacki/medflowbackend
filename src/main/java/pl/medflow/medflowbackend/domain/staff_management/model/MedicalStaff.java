@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import pl.medflow.medflowbackend.domain.identity.user.model.User;
 import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
-import pl.medflow.medflowbackend.domain.shared.enums.MedicalStaffPosition;
 
 
 @Document(collection = "staff")
@@ -26,7 +25,7 @@ public class MedicalStaff extends User {
 
     private MedicalStaffPosition position;
 
-    /** change to departmentId later */
+    /** TODO change to departmentId later */
     private String department;
 
     private RoomLocation assignedRoom;

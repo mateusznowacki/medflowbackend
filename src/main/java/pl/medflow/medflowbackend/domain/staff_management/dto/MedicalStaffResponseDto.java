@@ -1,9 +1,9 @@
-package pl.medflow.medflowbackend.domain.staff_management;
+package pl.medflow.medflowbackend.domain.staff_management.dto;
 
 import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
-import pl.medflow.medflowbackend.domain.shared.enums.MedicalStaffPosition;
+import pl.medflow.medflowbackend.domain.staff_management.model.MedicalStaffPosition;
 
-public record StaffResponse(
+public record MedicalStaffResponseDto(
         String id,
         String firstName,
         String lastName,

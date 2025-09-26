@@ -1,18 +1,19 @@
 package pl.medflow.medflowbackend.domain.staff_management.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.medflow.medflowbackend.domain.identity.auth.model.Account;
 import pl.medflow.medflowbackend.domain.identity.auth.repository.AccountRepository;
-import pl.medflow.medflowbackend.domain.shared.enums.MedicalStaffPosition;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
-import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffRegistrationRequest;
-import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffRepository;
-import pl.medflow.medflowbackend.domain.staff_management.StaffResponse;
+import pl.medflow.medflowbackend.domain.staff_management.dto.MedicalStaffRegistrationRequestDto;
+import pl.medflow.medflowbackend.domain.staff_management.dto.MedicalStaffResponseDto;
+import pl.medflow.medflowbackend.domain.staff_management.dto.MedicalStaffUpdateRequestDto;
 import pl.medflow.medflowbackend.domain.staff_management.model.MedicalStaff;
+import pl.medflow.medflowbackend.domain.staff_management.model.MedicalStaffPosition;
+import pl.medflow.medflowbackend.domain.staff_management.repository.MedicalStaffRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,53 +21,61 @@ public class MedicalStaffService {
 
     private final MedicalStaffRepository staffRepo;
     private final AccountRepository accountRepo;
-    private final PasswordEncoder passwordEncoder;
 
     // CREATE / REGISTER
-    public StaffResponse registerMedicalStaff(MedicalStaffRegistrationRequest request) {
-        if (accountRepo.existsByEmail(request.getEmail())) {
+    public MedicalStaffResponseDto registerMedicalStaff(MedicalStaffRegistrationRequestDto request) {
+        if (accountRepo.existsByEmail(request.email())) {
             throw new IllegalArgumentException("Medical staff with this email already exists");
         }
 
-        MedicalStaff staff = MedicalStaff.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phoneNumber(request.getPhoneNumber())
+        String id = UUID.randomUUID().toString();
+
+        Account account = Account.builder()
+                .id(id)
+                .email(request.email())
+                .passwordHash(request.password())
                 .role(Role.MEDICAL_STAFF)
-                .position(request.getPosition())
-                .department(request.getDepartment())
-                .assignedRoom(request.getAssignedRoom())
-                .licenseNumber(request.getLicenseNumber())
+                .build();
+        accountRepo.save(account);
+
+        MedicalStaff staff = MedicalStaff.builder()
+                .id(id)
+                .role(Role.MEDICAL_STAFF)
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .email(request.email())
+                .position(request.position())
+                .department(request.department())
+                .assignedRoom(request.assignedRoom())
+                .licenseNumber(request.licenseNumber())
                 .build();
 
         MedicalStaff saved = staffRepo.save(staff);
-
-        // Create login account linked by the same ID
-        accountRepo.save(Account.builder()
-                .id(saved.getId())
-                .email(saved.getEmail())
-                .passwordHash(saved.getPassword())
-                .role(Role.MEDICAL_STAFF)
-                .build());
-
         return toResponse(saved);
     }
 
     // READ - all
-    public List<StaffResponse> getAllMedicalStaff() {
+    public List<MedicalStaffResponseDto> getAllMedicalStaff() {
         return staffRepo.findAll().stream().map(this::toResponse).toList();
     }
 
     // READ - by id
-    public StaffResponse getMedicalStaffById(String id) {
+    public MedicalStaffResponseDto getMedicalStaffById(String id) {
         return staffRepo.findById(id).map(this::toResponse)
                 .orElseThrow(() -> new IllegalArgumentException("Medical staff not found"));
     }
 
+    // READ - by email
+    public MedicalStaffResponseDto getMedicalStaffByEmail(String email) {
+        return staffRepo.findAll().stream()
+                .filter(s -> email.equalsIgnoreCase(s.getEmail()))
+                .findFirst()
+                .map(this::toResponse)
+                .orElseThrow(() -> new IllegalArgumentException("Medical staff not found"));
+    }
+
     // READ - by position
-    public List<StaffResponse> getMedicalStaffByPosition(String position) {
+    public List<MedicalStaffResponseDto> getMedicalStaffByPosition(String position) {
         MedicalStaffPosition pos;
         try {
             pos = MedicalStaffPosition.valueOf(position.toUpperCase());
@@ -80,38 +89,43 @@ public class MedicalStaffService {
     }
 
     // READ - by department
-    public List<StaffResponse> getMedicalStaffByDepartment(String department) {
+    public List<MedicalStaffResponseDto> getMedicalStaffByDepartment(String department) {
         return staffRepo.findAll().stream()
                 .filter(s -> department.equalsIgnoreCase(s.getDepartment()))
                 .map(this::toResponse)
                 .toList();
     }
 
-    // UPDATE
-    public StaffResponse updateMedicalStaff(String id, MedicalStaffRegistrationRequest request) {
+    public MedicalStaffResponseDto updateMedicalStaff(String id, MedicalStaffUpdateRequestDto request) {
         MedicalStaff existing = staffRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Medical staff not found"));
 
-        if (request.getFirstName() != null) existing.setFirstName(request.getFirstName());
-        if (request.getLastName() != null) existing.setLastName(request.getLastName());
-        if (request.getPhoneNumber() != null) existing.setPhoneNumber(request.getPhoneNumber());
-        if (request.getPosition() != null) existing.setPosition(request.getPosition());
-        if (request.getDepartment() != null) existing.setDepartment(request.getDepartment());
-        if (request.getAssignedRoom() != null) existing.setAssignedRoom(request.getAssignedRoom());
-        if (request.getLicenseNumber() != null) existing.setLicenseNumber(request.getLicenseNumber());
-
-        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            String encoded = passwordEncoder.encode(request.getPassword());
-            existing.setPassword(encoded);
-            // update account password as well
-            accountRepo.findById(id).ifPresent(acc -> {
-                acc.setPasswordHash(encoded);
-                accountRepo.save(acc);
-            });
+        if(request.email() != null) {
+            if (!request.email().equalsIgnoreCase(existing.getEmail()) && accountRepo.existsByEmail(request.email())) {
+                throw new IllegalArgumentException("Email already in use");
+            }
+            existing.setEmail(request.email());
+            Account acc = accountRepo.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Associated account not found"));
+            acc.setEmail(request.email());
+            accountRepo.save(acc);
         }
+        if(request.phoneNumber() != null) existing.setPhoneNumber(request.phoneNumber());
+        if(request.position() != null) existing.setPosition(request.position());
+        if(request.department() != null) existing.setDepartment(request.department());
+        if(request.assignedRoom() != null) existing.setAssignedRoom(request.assignedRoom());
+        if(request.licenseNumber() != null) existing.setLicenseNumber(request.licenseNumber());
 
         MedicalStaff saved = staffRepo.save(existing);
         return toResponse(saved);
+    }
+
+    // CHANGE PASSWORD (Account only)
+    public void changePassword(String id, String newPasswordHash) {
+        Account acc = accountRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+        acc.setPasswordHash(newPasswordHash);
+        accountRepo.save(acc);
     }
 
     // DELETE
@@ -122,17 +136,17 @@ public class MedicalStaffService {
         accountRepo.deleteById(id);
     }
 
-    private StaffResponse toResponse(MedicalStaff s) {
-        return new StaffResponse(
-                s.getId(),
-                s.getFirstName(),
-                s.getLastName(),
-                s.getEmail(),
-                s.getPhoneNumber(),
-                s.getPosition(),
-                s.getDepartment(),
-                s.getAssignedRoom(),
-                s.getLicenseNumber()
+    private MedicalStaffResponseDto toResponse(MedicalStaff medicalStaff) {
+        return new MedicalStaffResponseDto(
+                medicalStaff.getId(),
+                medicalStaff.getFirstName(),
+                medicalStaff.getLastName(),
+                medicalStaff.getEmail(),
+                medicalStaff.getPhoneNumber(),
+                medicalStaff.getPosition(),
+                medicalStaff.getDepartment(),
+                medicalStaff.getAssignedRoom(),
+                medicalStaff.getLicenseNumber()
         );
     }
 }

@@ -12,7 +12,7 @@ import pl.medflow.medflowbackend.domain.identity.auth.repository.AccountReposito
 import pl.medflow.medflowbackend.domain.patient_management.repository.PatientRepository;
 import pl.medflow.medflowbackend.domain.patient_management.model.Patient;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
-import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffRepository;
+import pl.medflow.medflowbackend.domain.staff_management.repository.MedicalStaffRepository;
 import pl.medflow.medflowbackend.domain.staff_management.model.MedicalStaff;
 
 import java.util.UUID;
