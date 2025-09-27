@@ -16,11 +16,11 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Account create(String email, String rawPassword, String role) {
+    public Account create(String email, String rawPassword, Role role) {
         var account = Account.builder()
                 .email(email)
                 .passwordHash(passwordEncoder.encode(rawPassword))
-                .role(Enum.valueOf(Role.class, role))
+                .role(role)
                 .build();
         return accountRepository.save(account);
     }
@@ -58,15 +58,14 @@ public class AccountService {
         }
     }
 
-    public boolean verifyPassword(String account, String rawPassword) {
-        return null  //passwordEncoder.matches(rawPassword, account.getPasswordHash());
+    public boolean verifyPassword(String account, String passwordHash) {
+        var password = accountRepository.findByEmail(account)
+                .orElseThrow(() -> new IllegalArgumentException("Account with email " + account + " not found."))
+                .getPasswordHash();
+        return passwordEncoder.matches(passwordHash, password);
     }
 
-    public void deleteByEmail(String email) {
-        accountRepository.deleteByEmail(email);
-    }
-
-    public void deleteById(String id) {
+    public void delete(String id) {
         accountRepository.deleteById(id);
     }
 }

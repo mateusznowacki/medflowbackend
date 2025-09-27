@@ -25,7 +25,6 @@ public class MedicalStaff extends User {
 
     private MedicalStaffPosition position;
 
-    /** TODO change to departmentId later */
     private String department;
 
     private RoomLocation assignedRoom;

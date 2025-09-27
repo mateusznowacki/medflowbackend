@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -23,7 +22,7 @@ public class Account {
 
     @Id
     @EqualsAndHashCode.Include
-    private ObjectId id;
+    private String id;
 
     @Indexed(unique = true)
     private String email;
@@ -38,3 +37,4 @@ public class Account {
     private java.time.Instant updatedAt;
 
 }
+//todo ogarnac account najpierw

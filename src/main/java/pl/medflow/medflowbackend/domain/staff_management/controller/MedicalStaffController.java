@@ -22,7 +22,7 @@ public class MedicalStaffController {
     @PostMapping("/register")
     public ResponseEntity<MedicalStaffResponseDto> registerMedicalStaff(@Valid @RequestBody MedicalStaffRegistrationRequestDto request) {
         try {
-            MedicalStaffResponseDto staff = medicalStaffService.registerMedicalStaff(request);
+            MedicalStaffResponseDto staff = medicalStaffService.create(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(staff);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -70,7 +70,7 @@ public class MedicalStaffController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMedicalStaff(@PathVariable String id) {
         try {
-            medicalStaffService.deleteMedicalStaff(id);
+            medicalStaffService.delete(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
