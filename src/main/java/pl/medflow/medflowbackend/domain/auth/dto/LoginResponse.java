@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.identity.auth.dto;
+package pl.medflow.medflowbackend.domain.auth.dto;
 
 
 import lombok.AllArgsConstructor;
@@ -10,6 +10,6 @@ import lombok.Data;
 @Builder
 public class LoginResponse {
     private String accessToken;
-    private long expiresIn;   // sekundy do wygaśnięcia access tokenu
+    private long expiresIn;
 
 }

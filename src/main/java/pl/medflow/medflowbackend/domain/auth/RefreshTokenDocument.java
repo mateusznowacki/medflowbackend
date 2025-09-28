@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.identity.auth.model;
+package pl.medflow.medflowbackend.domain.auth;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

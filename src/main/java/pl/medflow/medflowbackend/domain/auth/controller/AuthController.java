@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.identity.auth.controller;
+package pl.medflow.medflowbackend.domain.auth.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.medflow.medflowbackend.domain.identity.auth.dto.LoginRequest;
-import pl.medflow.medflowbackend.domain.identity.auth.dto.LoginResponse;
-import pl.medflow.medflowbackend.domain.identity.auth.service.AuthService;
+import pl.medflow.medflowbackend.domain.auth.dto.LoginRequest;
+import pl.medflow.medflowbackend.domain.auth.dto.LoginResponse;
+import pl.medflow.medflowbackend.domain.auth.service.AuthService;
 import pl.medflow.medflowbackend.infrastructure.security.JwtProperties;
 
 import java.util.Arrays;

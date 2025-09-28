@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.identity.user.model;
+package pl.medflow.medflowbackend.domain.identity.model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

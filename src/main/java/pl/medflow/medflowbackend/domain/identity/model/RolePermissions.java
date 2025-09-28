@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.identity.auth.model;
+package pl.medflow.medflowbackend.domain.identity.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

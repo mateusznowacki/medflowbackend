@@ -1,7 +1,7 @@
-package pl.medflow.medflowbackend.domain.identity.auth.repository;
+package pl.medflow.medflowbackend.domain.identity.reposiotry;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import pl.medflow.medflowbackend.domain.identity.auth.model.RolePermissions;
+import pl.medflow.medflowbackend.domain.identity.model.RolePermissions;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
 
 import java.util.Optional;

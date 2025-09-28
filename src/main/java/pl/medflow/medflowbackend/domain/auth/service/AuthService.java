@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.identity.auth.service;
+package pl.medflow.medflowbackend.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -6,13 +6,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import pl.medflow.medflowbackend.domain.doctor_management.repository.DoctorRepository;
-import pl.medflow.medflowbackend.domain.identity.auth.dto.LoginRequest;
-import pl.medflow.medflowbackend.domain.identity.auth.dto.LoginResponse;
-import pl.medflow.medflowbackend.domain.identity.auth.model.Account;
-import pl.medflow.medflowbackend.domain.identity.auth.model.RefreshTokenDocument;
-import pl.medflow.medflowbackend.domain.identity.auth.repository.AccountRepository;
-import pl.medflow.medflowbackend.domain.identity.auth.repository.RefreshTokenRepository;
-import pl.medflow.medflowbackend.domain.identity.user.model.User;
+import pl.medflow.medflowbackend.domain.auth.dto.LoginRequest;
+import pl.medflow.medflowbackend.domain.auth.dto.LoginResponse;
+import pl.medflow.medflowbackend.domain.identity.model.Account;
+import pl.medflow.medflowbackend.domain.auth.RefreshTokenDocument;
+import pl.medflow.medflowbackend.domain.identity.reposiotry.AccountRepository;
+import pl.medflow.medflowbackend.domain.auth.repository.RefreshTokenRepository;
+import pl.medflow.medflowbackend.domain.identity.model.User;
 import pl.medflow.medflowbackend.domain.patient_management.repository.PatientRepository;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
 import pl.medflow.medflowbackend.domain.staff_management.repository.MedicalStaffRepository;

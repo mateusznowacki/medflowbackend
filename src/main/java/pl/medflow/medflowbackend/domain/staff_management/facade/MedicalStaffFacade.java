@@ -2,7 +2,7 @@ package pl.medflow.medflowbackend.domain.staff_management.facade;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.medflow.medflowbackend.domain.identity.auth.service.AccountService;
+import pl.medflow.medflowbackend.domain.identity.service.AccountService;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
 import pl.medflow.medflowbackend.domain.staff_management.dto.MedicalStaffRegistrationRequestDto;
 import pl.medflow.medflowbackend.domain.staff_management.service.MedicalStaffService;
