@@ -1,5 +1,5 @@
 
-package pl.medflow.medflowbackend.domain.identity.auth.model;
+package pl.medflow.medflowbackend.domain.identity.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,4 +37,3 @@ public class Account {
     private java.time.Instant updatedAt;
 
 }
-//todo ogarnac account najpierw

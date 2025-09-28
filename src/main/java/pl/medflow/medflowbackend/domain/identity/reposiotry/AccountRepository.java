@@ -1,7 +1,7 @@
-package pl.medflow.medflowbackend.domain.identity.auth.repository;
+package pl.medflow.medflowbackend.domain.identity.reposiotry;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import pl.medflow.medflowbackend.domain.identity.auth.model.Account;
+import pl.medflow.medflowbackend.domain.identity.model.Account;
 
 import java.util.Optional;
 
@@ -10,7 +10,5 @@ public interface AccountRepository extends MongoRepository<Account, String> {
 
     boolean existsByEmail(String email);
 
-    void deleteByEmail(String email);
-
-    void deleteById(String email);
+    void deleteById(String Id);
 }
