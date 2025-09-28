@@ -6,10 +6,10 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.medflow.medflowbackend.domain.identity.model.RolePermissions;
-import pl.medflow.medflowbackend.domain.identity.reposiotry.RolePermissionsRepository;
-import pl.medflow.medflowbackend.domain.identity.model.User;
-import pl.medflow.medflowbackend.domain.shared.enums.Permission;
+import pl.medflow.medflowbackend.domain.identity.role.RolePermissions;
+import pl.medflow.medflowbackend.domain.identity.role.RolePermissionsRepository;
+import pl.medflow.medflowbackend.domain.shared.user.model.User;
+import pl.medflow.medflowbackend.domain.identity.role.Permission;
 import pl.medflow.medflowbackend.infrastructure.secrets.AwsSecrets;
 
 import java.security.KeyFactory;
