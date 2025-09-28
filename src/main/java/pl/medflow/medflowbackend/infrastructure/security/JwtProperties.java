@@ -19,6 +19,7 @@ public class JwtProperties {
     @Setter
     public static class Access {
         private int expirationMinutes;
+        private int expirationDays;
         private String issuer;
     }
 

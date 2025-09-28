@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import pl.medflow.medflowbackend.todo.medical_records.model.MedicalProcedure;
 import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
-import pl.medflow.medflowbackend.domain.shared.user.model.User;
+import pl.medflow.medflowbackend.domain.shared.user.User;
 
 import java.util.List;
 

@@ -10,7 +10,7 @@ import pl.medflow.medflowbackend.todo.doctor_management.model.DoctorRegistration
 import pl.medflow.medflowbackend.todo.doctor_management.service.DoctorService;
 
 @RestController
-@RequestMapping("/api/doctors")
+@RequestMapping("/api/v1/doctors")
 @RequiredArgsConstructor
 public class DoctorController {
     

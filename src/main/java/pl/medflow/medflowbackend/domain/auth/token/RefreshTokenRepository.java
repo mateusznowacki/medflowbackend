@@ -1,7 +1,6 @@
-package pl.medflow.medflowbackend.domain.auth.repository;
+package pl.medflow.medflowbackend.domain.auth.token;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import pl.medflow.medflowbackend.domain.auth.RefreshTokenDocument;
 
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.auth.dto;
+package pl.medflow.medflowbackend.domain.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

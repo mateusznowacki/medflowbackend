@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.auth;
+package pl.medflow.medflowbackend.domain.auth.token;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -8,7 +8,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 
 @Document(collection = "refresh_tokens")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RefreshTokenDocument {
 
     @Id

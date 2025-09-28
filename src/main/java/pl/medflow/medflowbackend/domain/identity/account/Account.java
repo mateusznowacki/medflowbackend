@@ -30,6 +30,7 @@ public class Account {
     private String passwordHash;
 
     private Role role;
+
     @CreatedDate
     private java.time.Instant createdAt;
 

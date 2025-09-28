@@ -13,7 +13,7 @@ import pl.medflow.medflowbackend.domain.staff_management.service.MedicalStaffSer
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/medical-staff")
+@RequestMapping("/api/v1/medical-staff")
 @RequiredArgsConstructor
 public class MedicalStaffController {
 

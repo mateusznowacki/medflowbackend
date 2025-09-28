@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/api/v1/documents")
 @RequiredArgsConstructor
 public class MedicalDocumentController {
 

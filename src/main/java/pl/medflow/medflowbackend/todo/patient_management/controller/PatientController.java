@@ -16,7 +16,7 @@ import pl.medflow.medflowbackend.todo.patient_management.service.PatientService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/patients")
+@RequestMapping("/api/v1/patients")
 @RequiredArgsConstructor
 public class PatientController {
 

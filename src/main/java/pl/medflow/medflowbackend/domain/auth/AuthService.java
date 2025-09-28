@@ -1,23 +1,21 @@
-package pl.medflow.medflowbackend.domain.auth.service;
+package pl.medflow.medflowbackend.domain.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import pl.medflow.medflowbackend.todo.doctor_management.repository.DoctorRepository;
-import pl.medflow.medflowbackend.domain.auth.dto.LoginRequest;
-import pl.medflow.medflowbackend.domain.auth.dto.LoginResponse;
+import pl.medflow.medflowbackend.domain.auth.token.RefreshTokenDocument;
+import pl.medflow.medflowbackend.domain.auth.token.RefreshTokenRepository;
+import pl.medflow.medflowbackend.domain.auth.token.TokenService;
 import pl.medflow.medflowbackend.domain.identity.account.Account;
-import pl.medflow.medflowbackend.domain.auth.RefreshTokenDocument;
 import pl.medflow.medflowbackend.domain.identity.account.AccountRepository;
-import pl.medflow.medflowbackend.domain.auth.repository.RefreshTokenRepository;
-import pl.medflow.medflowbackend.domain.shared.user.model.User;
-import pl.medflow.medflowbackend.todo.patient_management.repository.PatientRepository;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
+import pl.medflow.medflowbackend.domain.shared.user.User;
 import pl.medflow.medflowbackend.domain.staff_management.repository.MedicalStaffRepository;
 import pl.medflow.medflowbackend.infrastructure.security.JwtProperties;
-import pl.medflow.medflowbackend.infrastructure.security.JwtService;
+import pl.medflow.medflowbackend.todo.doctor_management.repository.DoctorRepository;
+import pl.medflow.medflowbackend.todo.patient_management.repository.PatientRepository;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -31,7 +29,7 @@ public class AuthService {
     private final PatientRepository patientRepo;
     private final MedicalStaffRepository staffRepo;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final TokenService tokenService;
     private final RefreshTokenRepository refreshRepo;
     private final JwtProperties props;
 
@@ -49,10 +47,10 @@ public class AuthService {
         User user = loadUserFor(acc);
 
         // Access token (permissions wstrzykiwane wewnątrz JwtService)
-        String access = jwtService.generateAccessToken(user);
+        String access = tokenService.generateAccessToken(user);
 
         // Refresh token
-        String jti = jwtService.newJti();
+        String jti = tokenService.newJti();
         Instant refreshExp = Instant.now().plus(Duration.ofDays(props.getRefresh().getExpirationDays()));
         refreshRepo.save(RefreshTokenDocument.builder()
                 .id(jti)
@@ -61,7 +59,7 @@ public class AuthService {
                 .revoked(false)
                 .build());
 
-        String refresh = jwtService.generateRefreshToken(user, jti);
+        String refresh = tokenService.generateRefreshToken(user, jti);
 
         return new LoginResult(
                 toLoginResponse(user, access),
@@ -77,7 +75,7 @@ public class AuthService {
             throw new IllegalArgumentException("Missing refresh token");
         }
 
-        var claims = jwtService.parse(refreshJwtFromCookie).getPayload();
+        var claims = tokenService.parse(refreshJwtFromCookie).getPayload();
         String userId = claims.getSubject();
         String jti = claims.getId();
 
@@ -92,9 +90,9 @@ public class AuthService {
 
         User user = loadUserFor(acc);
 
-        String access = jwtService.generateAccessToken(user);
+        String access = tokenService.generateAccessToken(user);
 
-        String newJti = jwtService.newJti();
+        String newJti = tokenService.newJti();
         Instant refreshExp = Instant.now().plus(Duration.ofDays(props.getRefresh().getExpirationDays()));
         refreshRepo.save(RefreshTokenDocument.builder()
                 .id(newJti)
@@ -106,7 +104,7 @@ public class AuthService {
         doc.setReplacedBy(newJti);
         refreshRepo.save(doc);
 
-        String newRefresh = jwtService.generateRefreshToken(user, newJti);
+        String newRefresh = tokenService.generateRefreshToken(user, newJti);
 
         return new RefreshResult(
                 toLoginResponse(user, access),
@@ -118,7 +116,7 @@ public class AuthService {
     public ResponseCookie logout(String refreshJwtFromCookie) {
         try {
             if (StringUtils.hasText(refreshJwtFromCookie)) {
-                String jti = jwtService.getJti(refreshJwtFromCookie);
+                String jti = tokenService.getJti(refreshJwtFromCookie);
                 refreshRepo.findById(jti).ifPresent(token -> {
                     token.setRevoked(true);
                     refreshRepo.save(token);
@@ -140,13 +138,12 @@ public class AuthService {
         };
     }
 
- private LoginResponse toLoginResponse(User user, String accessToken) {
-    return LoginResponse.builder()
-            .accessToken(accessToken)
-            .expiresIn(props.getAccess().getExpirationMinutes() * 60L)
-            .build();
+private LoginResponse toLoginResponse(User user, String accessToken) {
+    return new LoginResponse(
+            accessToken,
+            props.getAccess().getExpirationMinutes() * 60L
+    );
 }
-
 
     private int refreshMaxAgeSeconds() {
         return (int) Duration.ofDays(props.getRefresh().getExpirationDays()).getSeconds();
