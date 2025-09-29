@@ -3,6 +3,10 @@ package pl.medflow.medflowbackend.domain.auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
+import pl.medflow.medflowbackend.domain.auth.exceptions.InvalidCredentialsException;
+import pl.medflow.medflowbackend.domain.auth.exceptions.InvalidTokenException;
+import pl.medflow.medflowbackend.domain.auth.exceptions.MissingRefreshTokenException;
+import pl.medflow.medflowbackend.domain.auth.exceptions.UserNotFoundException;
 import pl.medflow.medflowbackend.domain.identity.account.UserAccountService;
 import pl.medflow.medflowbackend.domain.token.JwtTokens;
 import pl.medflow.medflowbackend.domain.token.TokenService;
@@ -16,10 +20,10 @@ public class AuthService {
 
     public LoginResult login(LoginRequest req) {
         var user = userAccountService.findByEmail(req.email())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+                .orElseThrow(InvalidCredentialsException::new);
         boolean verifiedPassword = userAccountService.verifyPassword(req.email(), req.password());
         if (!verifiedPassword) {
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new InvalidCredentialsException();
         }
 
         JwtTokens tokens = tokenService.issueTokens(user);
@@ -31,14 +35,19 @@ public class AuthService {
 
     public LoginResult refresh(String refreshJwtFromCookie) {
         if (refreshJwtFromCookie == null || refreshJwtFromCookie.isBlank()) {
-            throw new IllegalArgumentException("Missing refresh token");
+            throw new MissingRefreshTokenException();
         }
 
-        var claims = tokenService.parse(refreshJwtFromCookie).getPayload();
-        String subject = claims.getSubject();
+        String subject;
+        try {
+            var claims = tokenService.parse(refreshJwtFromCookie).getPayload();
+            subject = claims.getSubject();
+        } catch (RuntimeException ex) {
+            throw new InvalidTokenException();
+        }
 
         var user = userAccountService.getById(subject)
-                .orElseThrow(() -> new IllegalStateException("User not found"));
+                .orElseThrow(UserNotFoundException::new);
 
         JwtTokens tokens = tokenService.rotateTokens(refreshJwtFromCookie, user);
 
