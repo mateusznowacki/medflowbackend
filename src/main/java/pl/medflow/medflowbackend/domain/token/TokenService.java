@@ -19,7 +19,7 @@ public interface TokenService {
 
     JwtTokens issueTokens(UserAccount user);
 
-    JwtTokens rotateTokens(String refreshJwt);
+    JwtTokens rotateTokens(String refreshJwt, UserAccount user);
 
     int getRefreshExpirationSeconds();
 

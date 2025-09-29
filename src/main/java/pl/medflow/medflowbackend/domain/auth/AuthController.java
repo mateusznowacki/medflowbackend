@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.medflow.medflowbackend.domain.token.JwtProperties;
 
 import java.util.Arrays;
 
@@ -19,7 +18,6 @@ import java.util.Arrays;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtProperties props;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -31,7 +29,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(HttpServletRequest req) {
-        String cookieName = props.getCookie().getName();
+        String cookieName = authService.getCookieName();
         String token = null;
         if (req.getCookies() != null) {
             for (var c : req.getCookies()) {
@@ -49,7 +47,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest req) {
-        String cookieName = props.getCookie().getName();
+        String cookieName = authService.getCookieName();
         String token = req.getCookies() == null ? null :
                 Arrays.stream(req.getCookies())
                         .filter(c -> cookieName.equals(c.getName()))
@@ -57,7 +55,7 @@ public class AuthController {
                         .findFirst()
                         .orElse(null);
 
-        var clear = authService.logout(token);
+        var clear = authService.logout();
         return ResponseEntity.noContent()
                 .header("Set-Cookie", clear.toString())
                 .build();

@@ -15,7 +15,7 @@ public class AuthService {
     private final UserAccountService userAccountService;
 
     public LoginResult login(LoginRequest req) {
-            var user = userAccountService.findByEmail(req.email())
+        var user = userAccountService.findByEmail(req.email())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
         boolean verifiedPassword = userAccountService.verifyPassword(req.email(), req.password());
         if (!verifiedPassword) {
@@ -24,7 +24,7 @@ public class AuthService {
 
         JwtTokens tokens = tokenService.issueTokens(user);
         ResponseCookie cookie = buildRefreshCookie(tokens.refreshToken(),
-               tokenService.getRefreshExpirationSeconds());
+                tokenService.getRefreshExpirationSeconds());
         LoginResponse body = LoginResponse.bearer(tokens.accessToken(), tokens.expiresInSeconds());
         return new LoginResult(body, cookie);
     }
@@ -33,24 +33,43 @@ public class AuthService {
         if (refreshJwtFromCookie == null || refreshJwtFromCookie.isBlank()) {
             throw new IllegalArgumentException("Missing refresh token");
         }
-        JwtTokens tokens = tokenService.rotateTokens(refreshJwtFromCookie);
-        ResponseCookie cookie = buildRefreshCookie(tokens.refreshToken(),
-                tokenService.getRefreshExpirationSeconds());
-        LoginResponse body = LoginResponse.bearer(tokens.accessToken(), tokens.expiresInSeconds());
+
+        var claims = tokenService.parse(refreshJwtFromCookie).getPayload();
+        String subject = claims.getSubject();
+
+        var user = userAccountService.getById(subject)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        JwtTokens tokens = tokenService.rotateTokens(refreshJwtFromCookie, user);
+
+        ResponseCookie cookie = buildRefreshCookie(
+                tokens.refreshToken(),
+                tokenService.getRefreshExpirationSeconds()
+        );
+
+        LoginResponse body = LoginResponse.bearer(
+                tokens.accessToken(),
+                tokens.expiresInSeconds()
+        );
+
         return new LoginResult(body, cookie);
     }
 
-    public ResponseCookie logout(String refreshJwtFromCookie) {
+    public ResponseCookie logout() {
         return buildRefreshCookie("", 0);
     }
 
-private ResponseCookie buildRefreshCookie(String value, int maxAgeSeconds) {
-    return ResponseCookie.from(tokenService.getCookieName(), value)
-            .httpOnly(true)
-            .secure(tokenService.isCookieSecure())
-            .sameSite(tokenService.getCookieSameSite())
-            .path(tokenService.getCookiePath())
-            .maxAge(maxAgeSeconds)
-            .build();
-}
+    private ResponseCookie buildRefreshCookie(String value, int maxAgeSeconds) {
+        return ResponseCookie.from(tokenService.getCookieName(), value)
+                .httpOnly(true)
+                .secure(tokenService.isCookieSecure())
+                .sameSite(tokenService.getCookieSameSite())
+                .path(tokenService.getCookiePath())
+                .maxAge(maxAgeSeconds)
+                .build();
+    }
+
+    public String getCookieName() {
+        return tokenService.getCookieName();
+    }
 }

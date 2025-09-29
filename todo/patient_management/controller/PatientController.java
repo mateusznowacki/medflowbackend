@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.medflow.medflowbackend.domain.patient_management.dto.*;
+
 import pl.medflow.medflowbackend.todo.patient_management.dto.PatientConsentRequest;
 import pl.medflow.medflowbackend.todo.patient_management.dto.PatientCreateRequest;
 import pl.medflow.medflowbackend.todo.patient_management.dto.PatientMedicalUpdateRequest;

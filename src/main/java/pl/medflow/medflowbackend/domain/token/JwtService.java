@@ -7,7 +7,6 @@ import io.jsonwebtoken.security.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
-import pl.medflow.medflowbackend.domain.identity.account.UserAccountService;
 import pl.medflow.medflowbackend.domain.identity.role.RolePermissionService;
 import pl.medflow.medflowbackend.infrastructure.secrets.AwsSecrets;
 
@@ -31,7 +30,6 @@ public class JwtService implements TokenService {
     private final AwsSecrets awsSecrets;
 
     private final RolePermissionService rolePermissionService;
-    private final UserAccountService userAccountService;
 
     @Override
     public String generateAccessToken(UserAccount user) {
@@ -90,28 +88,22 @@ public class JwtService implements TokenService {
         return new JwtTokens(accessToken, refreshToken, jti, expiresIn);
     }
 
-    @Override
-    public JwtTokens rotateTokens(String refreshJwt) {
-        Jws<Claims> claims = parse(refreshJwt);
-        if (isExpired(refreshJwt)) {
-            throw new IllegalStateException("Refresh token expired");
-        }
-        // Ensure it's a refresh token
-        Claims payload = claims.getPayload();
-        Object typ = payload.get("typ");
-        if (typ != null && !"refresh".equals(typ.toString())) {
-            throw new IllegalArgumentException("Invalid token type");
-        }
-
-        String jti = newJti();
-        String subject = payload.getSubject();
-
-       var user = userAccountService.getById(subject);
-        String accessToken = generateAccessToken(user.orElse(null));
-        String refreshToken = generateRefreshToken(user.orElse(null), jti);
-        long expiresIn = jwtProperties.getAccess().accessExpirationSeconds();
-        return new JwtTokens(accessToken, refreshToken, jti, expiresIn);
+public JwtTokens rotateTokens(String refreshJwt, UserAccount user) {
+    Jws<Claims> claims = parse(refreshJwt);
+    if (isExpired(refreshJwt)) {
+        throw new IllegalStateException("Refresh token expired");
     }
+    if (!"refresh".equals(claims.getPayload().get("typ"))) {
+        throw new IllegalArgumentException("Invalid token type");
+    }
+
+    String jti = newJti();
+    String accessToken = generateAccessToken(user);
+    String refreshToken = generateRefreshToken(user, jti);
+    long expiresIn = jwtProperties.getAccess().accessExpirationSeconds();
+    return new JwtTokens(accessToken, refreshToken, jti, expiresIn);
+}
+
 
 @Override
     public int getRefreshExpirationSeconds() {

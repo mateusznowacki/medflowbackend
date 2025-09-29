@@ -78,7 +78,7 @@ public class UserAccountService {
                 );
     }
 
-    public Optional<UserAccount> getById(@ NotBlank String id) {
+    public Optional<UserAccount> getById(@NotBlank String id) {
         return accountRepository.findById(id);
     }
 
