@@ -20,10 +20,10 @@ logging:
 
 jwt:
   access:
-    expirationMinutes: 15
+    expiration-seconds: 900
     issuer: medflow-access
   refresh:
-    expirationDays: 7
+    expiration-seconds: 604800
     issuer: medflow-refresh
   cookie:
     name: refresh_token
