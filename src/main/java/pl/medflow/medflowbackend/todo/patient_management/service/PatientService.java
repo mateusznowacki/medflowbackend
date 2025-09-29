@@ -3,7 +3,7 @@ package pl.medflow.medflowbackend.todo.patient_management.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.medflow.medflowbackend.domain.identity.account.Account;
+import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
 import pl.medflow.medflowbackend.domain.identity.account.AccountRepository;
 import pl.medflow.medflowbackend.todo.patient_management.dto.PatientConsentRequest;
 import pl.medflow.medflowbackend.todo.patient_management.dto.PatientCreateRequest;
@@ -53,7 +53,7 @@ public class PatientService {
         Patient saved = patientRepo.save(patient);
 
         // Tworzymy konto logowania
-        accountRepo.save(Account.builder()
+        accountRepo.save(UserAccount.builder()
                 .id(saved.getId())
                 .email(saved.getEmail())
              //   .passwordHash(saved.getPassword())

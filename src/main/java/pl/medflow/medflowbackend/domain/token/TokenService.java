@@ -1,14 +1,14 @@
-package pl.medflow.medflowbackend.domain.auth.token;
+package pl.medflow.medflowbackend.domain.token;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import pl.medflow.medflowbackend.domain.shared.user.BasicUserDto;
+import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
 
 public interface TokenService {
 
-    String generateAccessToken(BasicUserDto user);
+    String generateAccessToken(UserAccount user);
 
-    String generateRefreshToken(BasicUserDto user, String jti);
+    String generateRefreshToken(UserAccount user, String jti);
 
     Jws<Claims> parse(String jwt);
 
@@ -20,7 +20,7 @@ public interface TokenService {
 
     String newJti();
 
-    Tokens issueTokens(BasicUserDto user);
+    Tokens issueTokens(UserAccount user);
 
     Tokens rotateTokens(String refreshJwt);
 }

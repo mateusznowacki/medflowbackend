@@ -9,5 +9,5 @@ server:
 
 jwt:
   access:
-    expiration-minutes: 15
-    expiration-days: 7
+    expiration-seconds: 900
+    expiration-days-seconds: 604800

@@ -7,7 +7,7 @@ import pl.medflow.medflowbackend.todo.doctor_management.DoctorResponse;
 import pl.medflow.medflowbackend.todo.doctor_management.model.Doctor;
 import pl.medflow.medflowbackend.todo.doctor_management.model.DoctorRegistrationRequest;
 import pl.medflow.medflowbackend.todo.doctor_management.repository.DoctorRepository;
-import pl.medflow.medflowbackend.domain.identity.account.Account;
+import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
 import pl.medflow.medflowbackend.domain.identity.account.AccountRepository;
 import pl.medflow.medflowbackend.todo.medical_records.model.MedicalProcedure;
 import pl.medflow.medflowbackend.todo.medical_records.repository.MedicalProcedureRepository;
@@ -52,7 +52,7 @@ public class DoctorService {
         Doctor saved = doctorRepo.save(doc);
 
         // Create login account linked by the same ID
-        accountRepo.save(Account.builder()
+        accountRepo.save(UserAccount.builder()
                 .id(saved.getId())
                 .email(saved.getEmail())
              //   .passwordHash(saved.getPassword())

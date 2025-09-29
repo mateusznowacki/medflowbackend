@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.medflow.medflowbackend.infrastructure.security.JwtProperties;
+import pl.medflow.medflowbackend.domain.token.JwtProperties;
 
 import java.util.Arrays;
 

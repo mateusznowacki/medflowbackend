@@ -5,15 +5,15 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import pl.medflow.medflowbackend.domain.auth.token.RefreshTokenDocument;
-import pl.medflow.medflowbackend.domain.auth.token.RefreshTokenRepository;
-import pl.medflow.medflowbackend.domain.auth.token.TokenService;
-import pl.medflow.medflowbackend.domain.identity.account.Account;
+import pl.medflow.medflowbackend.domain.token.RefreshTokenDocument;
+import pl.medflow.medflowbackend.domain.token.RefreshTokenRepository;
+import pl.medflow.medflowbackend.domain.token.TokenService;
+import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
 import pl.medflow.medflowbackend.domain.identity.account.AccountRepository;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
 import pl.medflow.medflowbackend.domain.shared.user.User;
 import pl.medflow.medflowbackend.domain.staff_management.repository.MedicalStaffRepository;
-import pl.medflow.medflowbackend.infrastructure.security.JwtProperties;
+import pl.medflow.medflowbackend.domain.token.JwtProperties;
 import pl.medflow.medflowbackend.todo.doctor_management.repository.DoctorRepository;
 import pl.medflow.medflowbackend.todo.patient_management.repository.PatientRepository;
 
@@ -37,7 +37,7 @@ public class AuthService {
     public record LoginResult(LoginResponse body, ResponseCookie refreshCookie) {}
 
     public LoginResult login(LoginRequest req) {
-        Account acc = accountRepo.findByEmail(req.email())
+        UserAccount acc = accountRepo.findByEmail(req.email())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
 
         if (!passwordEncoder.matches(req.password(), acc.getPasswordHash())) {
@@ -85,7 +85,7 @@ public class AuthService {
         doc.setRevoked(true);
         refreshRepo.save(doc);
 
-        Account acc = accountRepo.findById(userId)
+        UserAccount acc = accountRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
 
         User user = loadUserFor(acc);
@@ -127,7 +127,7 @@ public class AuthService {
     }
 
     // ==== helpers ====
-    private User loadUserFor(Account acc) {
+    private User loadUserFor(UserAccount acc) {
         String id = acc.getId();
         Role role = acc.getRole();
         return switch (role) {

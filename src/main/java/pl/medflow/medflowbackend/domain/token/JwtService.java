@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.infrastructure.security;
+package pl.medflow.medflowbackend.domain.token;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -6,10 +6,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.medflow.medflowbackend.domain.auth.token.TokenService;
-import pl.medflow.medflowbackend.domain.auth.token.Tokens;
+import pl.medflow.medflowbackend.domain.identity.account.UserAccountService;
+import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
 import pl.medflow.medflowbackend.domain.identity.role.RolePermissionService;
-import pl.medflow.medflowbackend.domain.shared.user.BasicUserDto;
 import pl.medflow.medflowbackend.infrastructure.secrets.AwsSecrets;
 
 import java.security.KeyFactory;
@@ -26,33 +25,32 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtService implements TokenService {
 
-    private final JwtProperties props;
-    private final AwsSecrets secrets;
-    private final RolePermissionService roles;
+    private final JwtProperties jwtProperties;
+    private final AwsSecrets awsSecrets;
+    private final RolePermissionService rolePermissionService;
+    private final UserAccountService userAccountService;
 
     private volatile PrivateKey cachedPrivateKey;
     private volatile PublicKey cachedPublicKey;
 
 
     @Override
-    public String generateAccessToken(BasicUserDto user) {
+    public String generateAccessToken(UserAccount user) {
         var now = Instant.now();
-        var expirationMinutes = props.getAccess().getExpirationMinutes();
-        var expirationDays = props.getAccess().getExpirationDays();
-        var exp = now.plusSeconds(props.getAccess().getExpirationMinutes() * 60L);
+        var exp = now.plusSeconds(jwtProperties.getAccess().getExpirationSeconds());
 
-        var perms = roles.getPermissions(user.role()).stream().map(Enum::name).toList();
+        var perms = rolePermissionService.getPermissions(user.getRole()).stream().map(Enum::name).toList();
 
         return io.jsonwebtoken.Jwts.builder()
-                .setIssuer(props.getAccess().getIssuer())
-                .setSubject(user.id())
+                .setIssuer(jwtProperties.getAccess().getIssuer())
+                .setSubject(user.getId())
                 .setIssuedAt(java.util.Date.from(now))
                 .setExpiration(java.util.Date.from(exp))
                 .addClaims(java.util.Map.of(
-                        "email", user.email(),
-                        "role", user.role() != null ? user.role().name() : null,
-                        "firstName", user.firstName(),
-                        "lastName", user.lastName(),
+                        "email", user.getEmail(),
+                        "role", user.getRole() != null ? user.getRole().name() : null,
+                        "firstName", user.getFirstName(),
+                        "lastName", user.getLastName(),
                         "permissions", perms
                 ))
                 .signWith(getPrivateKey(), signatureFor(getPrivateKey()))
@@ -60,13 +58,13 @@ public class JwtService implements TokenService {
     }
 
     @Override
-    public String generateRefreshToken(BasicUserDto user, String jti) {
+    public String generateRefreshToken(UserAccount user, String jti) {
         var now = Instant.now();
-        var exp = now.plusSeconds(props.getRefresh().getExpirationDays() * 24L * 3600L);
+        var exp = now.plusSeconds(jwtProperties.getRefresh().getExpirationDays());
 
         return io.jsonwebtoken.Jwts.builder()
-                .setIssuer(props.getRefresh().getIssuer())
-                .setSubject(user.id())
+                .setIssuer(jwtProperties.getRefresh().getIssuer())
+                .setSubject(user.getId())
                 .setId(jti)
                 .setIssuedAt(java.util.Date.from(now))
                 .setExpiration(java.util.Date.from(exp))
@@ -85,13 +83,35 @@ public class JwtService implements TokenService {
     }
 
     @Override
-    public Tokens issueTokens(BasicUserDto user) {
-        return null;
+    public Tokens issueTokens(UserAccount user) {
+        String accessToken = generateAccessToken(user);
+        String jti = newJti();
+        String refreshToken = generateRefreshToken(user, jti);
+        long expiresIn = jwtProperties.getAccess().getExpirationSeconds();
+        return new Tokens(accessToken, refreshToken, jti, expiresIn);
     }
 
     @Override
     public Tokens rotateTokens(String refreshJwt) {
-        return null;
+        Jws<Claims> claims = parse(refreshJwt);
+        if (isExpired(refreshJwt)) {
+            throw new IllegalStateException("Refresh token expired");
+        }
+        // Ensure it's a refresh token
+        Claims payload = claims.getPayload();
+        Object typ = payload.get("typ");
+        if (typ != null && !"refresh".equals(typ.toString())) {
+            throw new IllegalArgumentException("Invalid token type");
+        }
+
+        String jti = newJti();
+        String subject = payload.getSubject();
+
+        UserAccount user = userAccountService.getById(subject);
+        String accessToken = generateAccessToken(user);
+        String refreshToken = generateRefreshToken(user, jti);
+        long expiresIn = jwtProperties.getAccess().getExpirationSeconds();
+        return new Tokens(accessToken, refreshToken, jti, expiresIn);
     }
 
     @Override
@@ -142,13 +162,13 @@ public class JwtService implements TokenService {
 
     private PrivateKey getPrivateKey() {
         if (cachedPrivateKey != null) return cachedPrivateKey;
-        String pem = notBlank(secrets.getJwtPrivateKeyPem(), "JWT private key is empty");
+        String pem = notBlank(awsSecrets.getJwtPrivateKeyPem(), "JWT private key is empty");
         return cachedPrivateKey = readPrivateKeyFromPem(pem);
     }
 
     private PublicKey getPublicKey() {
         if (cachedPublicKey != null) return cachedPublicKey;
-        String pem = notBlank(secrets.getJwtPublicKeyPem(), "JWT public key is empty");
+        String pem = notBlank(awsSecrets.getJwtPublicKeyPem(), "JWT public key is empty");
         return cachedPublicKey = readPublicKeyFromPem(pem);
     }
 

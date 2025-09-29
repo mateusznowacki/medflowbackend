@@ -1,5 +1,4 @@
-// security/JwtProperties.java
-package pl.medflow.medflowbackend.infrastructure.security;
+package pl.medflow.medflowbackend.domain.token;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,8 +17,9 @@ public class JwtProperties {
     @Getter
     @Setter
     public static class Access {
-        private int expirationMinutes;
-        private int expirationDays;
+        // ... existing code ...
+        private int expirationSeconds;
+        private int expirationDaysSeconds;
         private String issuer;
     }
 

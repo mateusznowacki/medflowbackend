@@ -8,18 +8,18 @@ import pl.medflow.medflowbackend.domain.shared.enums.Role;
 
 @Service
 @RequiredArgsConstructor
-public class AccountService {
+public class UserAccountService {
 
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Account create(String email, String rawPassword, Role role) {
+    public UserAccount create(String email, String rawPassword, Role role) {
         accountRepository.findByEmail(email).ifPresent(account -> {
             throw new IllegalArgumentException("Account with email " + email + " already exists.");
         });
 
-        var account = Account.builder()
+        var account = UserAccount.builder()
                 .email(email)
                 .passwordHash(passwordEncoder.encode(rawPassword))
                 .role(role)
@@ -71,5 +71,11 @@ public class AccountService {
                         }
                 );
     }
+
+    public UserAccount getById(String id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+    }
+
 
 }

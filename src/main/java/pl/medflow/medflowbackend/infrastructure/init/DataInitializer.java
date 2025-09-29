@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.medflow.medflowbackend.todo.doctor_management.model.Doctor;
 import pl.medflow.medflowbackend.todo.doctor_management.repository.DoctorRepository;
-import pl.medflow.medflowbackend.domain.identity.account.Account;
+import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
 import pl.medflow.medflowbackend.domain.identity.account.AccountRepository;
 import pl.medflow.medflowbackend.todo.patient_management.repository.PatientRepository;
 import pl.medflow.medflowbackend.todo.patient_management.model.Patient;
@@ -41,7 +41,7 @@ public class DataInitializer {
             String id = UUID.randomUUID().toString();
 
             // Account
-            Account acc = Account.builder()
+            UserAccount acc = UserAccount.builder()
                     .id(id)
                     .email(email)
                     .passwordHash(passwordEncoder.encode(rawPassword))
@@ -69,7 +69,7 @@ public class DataInitializer {
         if (accountRepo.findByEmail(email).isEmpty()) {
             String id = UUID.randomUUID().toString();
 
-            Account acc = Account.builder()
+            UserAccount acc = UserAccount.builder()
                     .id(id)
                     .email(email)
                     .passwordHash(passwordEncoder.encode(rawPassword))
@@ -96,7 +96,7 @@ public class DataInitializer {
         if (accountRepo.findByEmail(email).isEmpty()) {
             String id = UUID.randomUUID().toString();
 
-            Account acc = Account.builder()
+            UserAccount acc = UserAccount.builder()
                     .id(id)
                     .email(email)
                     .passwordHash(passwordEncoder.encode(rawPassword))

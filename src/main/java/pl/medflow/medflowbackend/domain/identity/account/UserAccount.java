@@ -1,6 +1,7 @@
 
 package pl.medflow.medflowbackend.domain.identity.account;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,7 @@ import pl.medflow.medflowbackend.domain.shared.enums.Role;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Account {
+public class UserAccount {
 
     @Id
     @EqualsAndHashCode.Include
@@ -27,6 +28,13 @@ public class Account {
     @Indexed(unique = true)
     private String email;
 
+    @NotBlank
+    private String firstName;
+
+    @NotBlank
+    private String lastName;
+
+    @NotBlank
     private String passwordHash;
 
     private Role role;
@@ -37,4 +45,8 @@ public class Account {
     @LastModifiedDate
     private java.time.Instant updatedAt;
 
+
 }
+
+
+
