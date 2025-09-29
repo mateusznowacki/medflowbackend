@@ -37,7 +37,7 @@ public class JwtService implements TokenService {
     @Override
     public String generateAccessToken(UserAccount user) {
         var now = Instant.now();
-        var exp = now.plusSeconds(jwtProperties.getAccess().getExpirationSeconds());
+        var exp = now.plusSeconds(jwtProperties.getAccess().accessExpirationSeconds());
 
         var perms = rolePermissionService.getPermissions(user.getRole()).stream().map(Enum::name).toList();
 
@@ -60,7 +60,7 @@ public class JwtService implements TokenService {
     @Override
     public String generateRefreshToken(UserAccount user, String jti) {
         var now = Instant.now();
-        var exp = now.plusSeconds(jwtProperties.getRefresh().getExpirationDays());
+        var exp = now.plusSeconds(jwtProperties.getRefresh().refreshExpirationSeconds());
 
         return io.jsonwebtoken.Jwts.builder()
                 .setIssuer(jwtProperties.getRefresh().getIssuer())
@@ -87,7 +87,7 @@ public class JwtService implements TokenService {
         String accessToken = generateAccessToken(user);
         String jti = newJti();
         String refreshToken = generateRefreshToken(user, jti);
-        long expiresIn = jwtProperties.getAccess().getExpirationSeconds();
+        long expiresIn = jwtProperties.getAccess().accessExpirationSeconds();
         return new Tokens(accessToken, refreshToken, jti, expiresIn);
     }
 
@@ -110,7 +110,7 @@ public class JwtService implements TokenService {
         UserAccount user = userAccountService.getById(subject);
         String accessToken = generateAccessToken(user);
         String refreshToken = generateRefreshToken(user, jti);
-        long expiresIn = jwtProperties.getAccess().getExpirationSeconds();
+        long expiresIn = jwtProperties.getAccess().accessExpirationSeconds();
         return new Tokens(accessToken, refreshToken, jti, expiresIn);
     }
 

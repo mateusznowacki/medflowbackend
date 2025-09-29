@@ -17,17 +17,25 @@ public class JwtProperties {
     @Getter
     @Setter
     public static class Access {
-        // ... existing code ...
         private int expirationSeconds;
-        private int expirationDaysSeconds;
         private String issuer;
+
+        public long accessExpirationSeconds() {
+            if (expirationSeconds > 0) return expirationSeconds;
+            return 900L;
+        }
     }
 
     @Getter
     @Setter
     public static class Refresh {
-        private int expirationDays;
+        private int expirationSeconds;
         private String issuer;
+
+        public long refreshExpirationSeconds() {
+            if (expirationSeconds > 0) return expirationSeconds;
+            return 7L * 24 * 60 * 60;
+        }
     }
 
     @Getter
