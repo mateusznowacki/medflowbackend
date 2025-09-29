@@ -7,3 +7,4 @@ import java.util.Optional;
 public interface RefreshTokenRepository extends MongoRepository<RefreshTokenDocument, String> {
     Optional<RefreshTokenDocument> findByIdAndRevokedFalse(String id);
 }
+//todo consider using this or delete it

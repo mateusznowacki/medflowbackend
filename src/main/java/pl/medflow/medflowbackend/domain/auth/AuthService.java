@@ -2,160 +2,55 @@ package pl.medflow.medflowbackend.domain.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import pl.medflow.medflowbackend.domain.token.RefreshTokenDocument;
-import pl.medflow.medflowbackend.domain.token.RefreshTokenRepository;
+import pl.medflow.medflowbackend.domain.identity.account.UserAccountService;
+import pl.medflow.medflowbackend.domain.token.JwtTokens;
 import pl.medflow.medflowbackend.domain.token.TokenService;
-import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
-import pl.medflow.medflowbackend.domain.identity.account.AccountRepository;
-import pl.medflow.medflowbackend.domain.shared.enums.Role;
-import pl.medflow.medflowbackend.domain.shared.user.User;
-import pl.medflow.medflowbackend.domain.staff_management.repository.MedicalStaffRepository;
-import pl.medflow.medflowbackend.domain.token.JwtProperties;
-import pl.medflow.medflowbackend.todo.doctor_management.repository.DoctorRepository;
-import pl.medflow.medflowbackend.todo.patient_management.repository.PatientRepository;
-
-import java.time.Duration;
-import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final AccountRepository accountRepo;
-    private final DoctorRepository doctorRepo;
-    private final PatientRepository patientRepo;
-    private final MedicalStaffRepository staffRepo;
-    private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
-    private final RefreshTokenRepository refreshRepo;
-    private final JwtProperties props;
-
-    // ==== LOGIN ====
-    public record LoginResult(LoginResponse body, ResponseCookie refreshCookie) {}
+    private final UserAccountService userAccountService;
 
     public LoginResult login(LoginRequest req) {
-        UserAccount acc = accountRepo.findByEmail(req.email())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
-
-        if (!passwordEncoder.matches(req.password(), acc.getPasswordHash())) {
-            throw new IllegalArgumentException("Invalid credentials");
+            var user = userAccountService.findByEmail(req.email())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+        boolean verifiedPassword = userAccountService.verifyPassword(req.email(), req.password());
+        if (!verifiedPassword) {
+            throw new IllegalArgumentException("Invalid email or password");
         }
 
-        User user = loadUserFor(acc);
-
-        // Access token (permissions wstrzykiwane wewnątrz JwtService)
-        String access = tokenService.generateAccessToken(user);
-
-        // Refresh token
-        String jti = tokenService.newJti();
-        Instant refreshExp = Instant.now().plus(Duration.ofDays(props.getRefresh().getExpirationDays()));
-        refreshRepo.save(RefreshTokenDocument.builder()
-                .id(jti)
-                .userId(user.getId())
-                .expiresAt(refreshExp)
-                .revoked(false)
-                .build());
-
-        String refresh = tokenService.generateRefreshToken(user, jti);
-
-        return new LoginResult(
-                toLoginResponse(user, access),
-                buildRefreshCookie(refresh, refreshMaxAgeSeconds())
-        );
+        JwtTokens tokens = tokenService.issueTokens(user);
+        ResponseCookie cookie = buildRefreshCookie(tokens.refreshToken(),
+               tokenService.getRefreshExpirationSeconds());
+        LoginResponse body = LoginResponse.bearer(tokens.accessToken(), tokens.expiresInSeconds());
+        return new LoginResult(body, cookie);
     }
 
-    // ==== REFRESH ====
-    public record RefreshResult(LoginResponse body, ResponseCookie refreshCookie) {}
-
-    public RefreshResult refresh(String refreshJwtFromCookie) {
-        if (!StringUtils.hasText(refreshJwtFromCookie)) {
+    public LoginResult refresh(String refreshJwtFromCookie) {
+        if (refreshJwtFromCookie == null || refreshJwtFromCookie.isBlank()) {
             throw new IllegalArgumentException("Missing refresh token");
         }
-
-        var claims = tokenService.parse(refreshJwtFromCookie).getPayload();
-        String userId = claims.getSubject();
-        String jti = claims.getId();
-
-        RefreshTokenDocument doc = refreshRepo.findByIdAndRevokedFalse(jti)
-                .orElseThrow(() -> new IllegalArgumentException("Refresh token revoked or not found"));
-
-        doc.setRevoked(true);
-        refreshRepo.save(doc);
-
-        UserAccount acc = accountRepo.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
-
-        User user = loadUserFor(acc);
-
-        String access = tokenService.generateAccessToken(user);
-
-        String newJti = tokenService.newJti();
-        Instant refreshExp = Instant.now().plus(Duration.ofDays(props.getRefresh().getExpirationDays()));
-        refreshRepo.save(RefreshTokenDocument.builder()
-                .id(newJti)
-                .userId(user.getId())
-                .expiresAt(refreshExp)
-                .revoked(false)
-                .build());
-
-        doc.setReplacedBy(newJti);
-        refreshRepo.save(doc);
-
-        String newRefresh = tokenService.generateRefreshToken(user, newJti);
-
-        return new RefreshResult(
-                toLoginResponse(user, access),
-                buildRefreshCookie(newRefresh, refreshMaxAgeSeconds())
-        );
+        JwtTokens tokens = tokenService.rotateTokens(refreshJwtFromCookie);
+        ResponseCookie cookie = buildRefreshCookie(tokens.refreshToken(),
+                tokenService.getRefreshExpirationSeconds());
+        LoginResponse body = LoginResponse.bearer(tokens.accessToken(), tokens.expiresInSeconds());
+        return new LoginResult(body, cookie);
     }
 
-    // ==== LOGOUT ====
     public ResponseCookie logout(String refreshJwtFromCookie) {
-        try {
-            if (StringUtils.hasText(refreshJwtFromCookie)) {
-                String jti = tokenService.getJti(refreshJwtFromCookie);
-                refreshRepo.findById(jti).ifPresent(token -> {
-                    token.setRevoked(true);
-                    refreshRepo.save(token);
-                });
-            }
-        } catch (Exception ignored) { }
         return buildRefreshCookie("", 0);
     }
 
-    // ==== helpers ====
-    private User loadUserFor(UserAccount acc) {
-        String id = acc.getId();
-        Role role = acc.getRole();
-        return switch (role) {
-            case DOCTOR -> doctorRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Doctor not found"));
-            case PATIENT -> patientRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Patient not found"));
-            case MEDICAL_STAFF -> staffRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Staff not found"));
-            default -> throw new IllegalArgumentException("Unsupported role for profile: " + role);
-        };
-    }
-
-private LoginResponse toLoginResponse(User user, String accessToken) {
-    return new LoginResponse(
-            accessToken,
-            props.getAccess().getExpirationMinutes() * 60L
-    );
+private ResponseCookie buildRefreshCookie(String value, int maxAgeSeconds) {
+    return ResponseCookie.from(tokenService.getCookieName(), value)
+            .httpOnly(true)
+            .secure(tokenService.isCookieSecure())
+            .sameSite(tokenService.getCookieSameSite())
+            .path(tokenService.getCookiePath())
+            .maxAge(maxAgeSeconds)
+            .build();
 }
-
-    private int refreshMaxAgeSeconds() {
-        return (int) Duration.ofDays(props.getRefresh().getExpirationDays()).getSeconds();
-    }
-
-    private ResponseCookie buildRefreshCookie(String value, int maxAgeSeconds) {
-        return ResponseCookie.from(props.getCookie().getName(), value)
-                .httpOnly(true)
-                .secure(props.getCookie().isSecure())
-                .sameSite(props.getCookie().getSameSite())
-                .path(props.getCookie().getPath())
-                .maxAge(maxAgeSeconds)
-                .build();
-    }
 }

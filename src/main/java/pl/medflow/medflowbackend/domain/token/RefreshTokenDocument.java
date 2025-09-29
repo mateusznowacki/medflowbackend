@@ -20,10 +20,10 @@ public class RefreshTokenDocument {
 
     private String userId;
 
-    // <- TTL będzie liczony na podstawie tej daty
     @Indexed(expireAfter = "0s")
     private Instant expiresAt;
 
     private boolean revoked;
     private String replacedBy;
 }
+//todo consider using this or delete it

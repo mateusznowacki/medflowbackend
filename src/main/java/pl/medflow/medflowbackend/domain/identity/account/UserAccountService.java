@@ -1,10 +1,15 @@
 package pl.medflow.medflowbackend.domain.identity.account;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
+import pl.medflow.medflowbackend.domain.token.JwtService;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -12,6 +17,7 @@ public class UserAccountService {
 
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Transactional
     public UserAccount create(String email, String rawPassword, Role role) {
@@ -72,10 +78,12 @@ public class UserAccountService {
                 );
     }
 
-    public UserAccount getById(String id) {
-        return accountRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+    public Optional<UserAccount> getById(@ NotBlank String id) {
+        return accountRepository.findById(id);
     }
 
+    public Optional<UserAccount> findByEmail(@Email @NotBlank String email) {
+        return accountRepository.findByEmail(email);
+    }
 
 }

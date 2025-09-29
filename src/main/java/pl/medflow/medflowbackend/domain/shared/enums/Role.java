@@ -5,5 +5,5 @@ public enum Role {
     MEDICAL_STAFF,
     PATIENT,
     ADMIN,
-    SYSTEM_ADMIN;
+    SYSTEM_ADMIN
 }

@@ -20,9 +20,9 @@ public class JwtProperties {
         private int expirationSeconds;
         private String issuer;
 
-        public long accessExpirationSeconds() {
+        public int accessExpirationSeconds() {
             if (expirationSeconds > 0) return expirationSeconds;
-            return 900L;
+            return 900;
         }
     }
 
@@ -32,9 +32,9 @@ public class JwtProperties {
         private int expirationSeconds;
         private String issuer;
 
-        public long refreshExpirationSeconds() {
+        public int refreshExpirationSeconds() {
             if (expirationSeconds > 0) return expirationSeconds;
-            return 7L * 24 * 60 * 60;
+            return 7 * 24 * 60 * 60;
         }
     }
 

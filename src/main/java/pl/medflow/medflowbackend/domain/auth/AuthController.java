@@ -53,7 +53,7 @@ public class AuthController {
         String token = req.getCookies() == null ? null :
                 Arrays.stream(req.getCookies())
                         .filter(c -> cookieName.equals(c.getName()))
-                        .map(Cookie::getValue)   // krócej i czytelniej
+                        .map(Cookie::getValue)
                         .findFirst()
                         .orElse(null);
 

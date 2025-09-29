@@ -1,4 +1,3 @@
-// security/JwtAuthenticationFilter.java
 package pl.medflow.medflowbackend.domain.token;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

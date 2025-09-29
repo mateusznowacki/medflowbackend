@@ -6,8 +6,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.medflow.medflowbackend.domain.identity.account.UserAccountService;
 import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
+import pl.medflow.medflowbackend.domain.identity.account.UserAccountService;
 import pl.medflow.medflowbackend.domain.identity.role.RolePermissionService;
 import pl.medflow.medflowbackend.infrastructure.secrets.AwsSecrets;
 
@@ -25,14 +25,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtService implements TokenService {
 
-    private final JwtProperties jwtProperties;
-    private final AwsSecrets awsSecrets;
-    private final RolePermissionService rolePermissionService;
-    private final UserAccountService userAccountService;
-
     private volatile PrivateKey cachedPrivateKey;
     private volatile PublicKey cachedPublicKey;
+    private final JwtProperties jwtProperties;
+    private final AwsSecrets awsSecrets;
 
+    private final RolePermissionService rolePermissionService;
+    private final UserAccountService userAccountService;
 
     @Override
     public String generateAccessToken(UserAccount user) {
@@ -83,16 +82,16 @@ public class JwtService implements TokenService {
     }
 
     @Override
-    public Tokens issueTokens(UserAccount user) {
+    public JwtTokens issueTokens(UserAccount user) {
         String accessToken = generateAccessToken(user);
         String jti = newJti();
         String refreshToken = generateRefreshToken(user, jti);
         long expiresIn = jwtProperties.getAccess().accessExpirationSeconds();
-        return new Tokens(accessToken, refreshToken, jti, expiresIn);
+        return new JwtTokens(accessToken, refreshToken, jti, expiresIn);
     }
 
     @Override
-    public Tokens rotateTokens(String refreshJwt) {
+    public JwtTokens rotateTokens(String refreshJwt) {
         Jws<Claims> claims = parse(refreshJwt);
         if (isExpired(refreshJwt)) {
             throw new IllegalStateException("Refresh token expired");
@@ -107,21 +106,36 @@ public class JwtService implements TokenService {
         String jti = newJti();
         String subject = payload.getSubject();
 
-        UserAccount user = userAccountService.getById(subject);
-        String accessToken = generateAccessToken(user);
-        String refreshToken = generateRefreshToken(user, jti);
+       var user = userAccountService.getById(subject);
+        String accessToken = generateAccessToken(user.orElse(null));
+        String refreshToken = generateRefreshToken(user.orElse(null), jti);
         long expiresIn = jwtProperties.getAccess().accessExpirationSeconds();
-        return new Tokens(accessToken, refreshToken, jti, expiresIn);
+        return new JwtTokens(accessToken, refreshToken, jti, expiresIn);
+    }
+
+@Override
+    public int getRefreshExpirationSeconds() {
+        return jwtProperties.getRefresh().refreshExpirationSeconds();
     }
 
     @Override
-    public String getSubject(String jwt) {
-        return parse(jwt).getPayload().getSubject();
+    public String getCookieName() {
+        return jwtProperties.getCookie().getName();
     }
 
     @Override
-    public String getJti(String jwt) {
-        return parse(jwt).getPayload().getId();
+    public boolean isCookieSecure() {
+        return jwtProperties.getCookie().isSecure();
+    }
+
+    @Override
+    public String getCookieSameSite() {
+        return jwtProperties.getCookie().getSameSite();
+    }
+
+    @Override
+    public String getCookiePath() {
+        return jwtProperties.getCookie().getPath();
     }
 
     @Override

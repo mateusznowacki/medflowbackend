@@ -12,15 +12,22 @@ public interface TokenService {
 
     Jws<Claims> parse(String jwt);
 
-    String getSubject(String jwt);
-
-    String getJti(String jwt);
 
     boolean isExpired(String jwt);
 
     String newJti();
 
-    Tokens issueTokens(UserAccount user);
+    JwtTokens issueTokens(UserAccount user);
 
-    Tokens rotateTokens(String refreshJwt);
+    JwtTokens rotateTokens(String refreshJwt);
+
+    int getRefreshExpirationSeconds();
+
+    String getCookieName();
+
+    boolean isCookieSecure();
+
+    String getCookieSameSite();
+
+    String getCookiePath();
 }
