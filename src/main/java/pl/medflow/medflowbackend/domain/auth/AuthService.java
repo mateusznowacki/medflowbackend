@@ -26,20 +26,10 @@ public class AuthService {
         return tokenService.issueTokens(user);
     }
 
-    public LoginResult refresh(String refreshJwtFromCookie) {
-        return tokenService.refresh(refreshJwtFromCookie);
-    }
-
-    // Wariant wygodny dla kontrolera – bez znajomości nazwy ciasteczka
     public LoginResult refresh(HttpServletRequest request) {
         return tokenService.refreshFromRequest(request);
     }
 
-    public ResponseCookie logout(String refreshJwtFromCookie) {
-        return tokenService.logout(refreshJwtFromCookie);
-    }
-
-    // Convenience for controllers: no cookie name knowledge required
     public ResponseCookie logout(HttpServletRequest request) {
         return tokenService.logoutFromRequest(request);
     }

@@ -26,7 +26,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(HttpServletRequest req) {
-        var result = authService.refresh(req); // żadnego getCookieName, wszystko ukryte
+        var result = authService.refresh(req);
         return ResponseEntity.ok()
                 .header("Set-Cookie", result.refreshCookie().toString())
                 .body(result.body());

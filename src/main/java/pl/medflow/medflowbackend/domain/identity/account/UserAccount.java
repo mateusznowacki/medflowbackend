@@ -1,6 +1,7 @@
 
 package pl.medflow.medflowbackend.domain.identity.account;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +26,8 @@ public class UserAccount {
     @EqualsAndHashCode.Include
     private String id;
 
+    @Email
+    @NotBlank
     @Indexed(unique = true)
     private String email;
 

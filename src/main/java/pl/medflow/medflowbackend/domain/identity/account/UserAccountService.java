@@ -18,13 +18,15 @@ public class UserAccountService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public UserAccount create(String email, String rawPassword, Role role) {
+    public UserAccount create(String email,String firstName,String lastName, String rawPassword, Role role) {
         accountRepository.findByEmail(email).ifPresent(account -> {
             throw new IllegalArgumentException("Account with email " + email + " already exists.");
         });
 
         var account = UserAccount.builder()
                 .email(email)
+                .firstName(firstName)
+                .lastName(lastName)
                 .passwordHash(passwordEncoder.encode(rawPassword))
                 .role(role)
                 .build();
@@ -58,12 +60,6 @@ public class UserAccountService {
         );
     }
 
-    public boolean verifyPassword(String email, String rawPassword) {
-        var passwordHash = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Account with email " + email + " not found."))
-                .getPasswordHash();
-        return passwordEncoder.matches(rawPassword, passwordHash);
-    }
 
     @Transactional
     public void delete(String id) {

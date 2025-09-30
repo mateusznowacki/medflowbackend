@@ -1,7 +1,5 @@
 package pl.medflow.medflowbackend.domain.shared.user;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +9,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.time.Instant;
 
@@ -24,17 +21,6 @@ public abstract class User {
 
     @Id
     private String id;
-
-    @NotBlank
-    private String firstName;
-
-    @NotBlank
-    private String lastName;
-
-    @Email
-    @NotBlank
-    @Indexed(unique = true)
-    private String email;
 
     @Pattern(regexp = "^[0-9+\\- ]{7,15}$", message = "Invalid phone number format")
     private String phoneNumber;
