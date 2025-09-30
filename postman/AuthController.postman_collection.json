@@ -1,0 +1,180 @@
+{
+  "info": {
+    "_postman_id": "a3a3c4b8-8c76-4db0-9b5a-3cf0c9f07a11",
+    "name": "AuthController",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Auth API collection: login returns accessToken in body and sets HttpOnly refresh token cookie. refresh rotates tokens using the cookie. logout clears the cookie."
+  },
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Logs in with email/password. Response body contains accessToken (Bearer) and expiresIn. Also sets a secure HttpOnly refresh token cookie for rotation."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Parse JSON and save access token for Bearer auth",
+              "let json = {};",
+              "try { json = pm.response.json(); } catch (e) { json = {}; }",
+              "if (json && json.accessToken) {",
+              "  pm.collectionVariables.set('accessToken', json.accessToken);",
+              "}",
+              "if (json && json.expiresIn !== undefined) {",
+              "  pm.collectionVariables.set('accessTokenExpiresIn', json.expiresIn);",
+              "}",
+              "if (json && json.tokenType) {",
+              "  pm.collectionVariables.set('tokenType', json.tokenType);",
+              "}",
+              "pm.test('Login returned accessToken', function () { pm.expect(json.accessToken, 'accessToken').to.be.a('string').and.not.empty; });",
+              "pm.test('Set-Cookie refresh token present', function () { pm.expect(pm.response.headers.has('Set-Cookie')).to.be.true; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Refresh",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/refresh",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "refresh"
+          ]
+        },
+        "description": "Rotates tokens using the HttpOnly refresh token cookie. Returns new accessToken in body and sets a new refresh token cookie."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Ensure cookie jar will send refresh cookie automatically. No headers needed."
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let json = {};",
+              "try { json = pm.response.json(); } catch (e) { json = {}; }",
+              "if (json && json.accessToken) {",
+              "  pm.collectionVariables.set('accessToken', json.accessToken);",
+              "}",
+              "pm.test('Refresh returned accessToken', function () { pm.expect(json.accessToken, 'accessToken').to.be.a('string').and.not.empty; });",
+              "pm.test('Set-Cookie refresh token present', function () { pm.expect(pm.response.headers.has('Set-Cookie')).to.be.true; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "logout"
+          ]
+        },
+        "description": "Clears the refresh token cookie. Returns 204 No Content."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Logout is 204', function () { pm.response.to.have.status(204); });",
+              "// Clear access token so subsequent requests require re-login",
+              "pm.collectionVariables.unset('accessToken');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "admin@medflow.pl",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
