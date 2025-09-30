@@ -20,7 +20,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
@@ -29,7 +28,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class JwtService implements TokenService {
+public class JwtTokenService implements TokenService {
 
     private volatile PrivateKey cachedPrivateKey;
     private volatile PublicKey cachedPublicKey;
@@ -266,6 +265,21 @@ public class JwtService implements TokenService {
             }
         } catch (Exception ignored) { }
         return buildRefreshCookie("", 0);
+    }
+
+    @Override
+    public ResponseCookie logoutFromRequest(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return buildRefreshCookie("", 0);
+        }
+        String token = null;
+        for (Cookie c : request.getCookies()) {
+            if (cookieName().equals(c.getName())) {
+                token = c.getValue();
+                break;
+            }
+        }
+        return logout(token);
     }
 
     @Override

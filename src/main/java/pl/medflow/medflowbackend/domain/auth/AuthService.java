@@ -38,4 +38,9 @@ public class AuthService {
     public ResponseCookie logout(String refreshJwtFromCookie) {
         return tokenService.logout(refreshJwtFromCookie);
     }
+
+    // Convenience for controllers: no cookie name knowledge required
+    public ResponseCookie logout(HttpServletRequest request) {
+        return tokenService.logoutFromRequest(request);
+    }
 }

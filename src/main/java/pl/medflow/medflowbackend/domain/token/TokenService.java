@@ -18,5 +18,8 @@ public interface TokenService {
     // Logout should revoke current refresh token by jti and expire cookie
     ResponseCookie logout(String refreshJwtFromCookie);
 
+    // Convenience: logout using request cookies without exposing cookie name
+    ResponseCookie logoutFromRequest(HttpServletRequest request);
+
     AccessClaims verifyAccessToken(String accessJwt);
 }
