@@ -4,9 +4,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
-import pl.medflow.medflowbackend.domain.staff_management.model.MedicalStaffPosition;
+import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffPosition;
 
-public record MedicalStaffRegistrationRequestDto(
+public record MedicalStaffRegistrationRequest(
         @NotBlank String firstName,
         @NotBlank String lastName,
         @Email @NotBlank String email,

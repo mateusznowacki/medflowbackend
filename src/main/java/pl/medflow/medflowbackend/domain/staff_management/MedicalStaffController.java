@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.staff_management.controller;
+package pl.medflow.medflowbackend.domain.staff_management;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,10 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/medical-staff")
 @RequiredArgsConstructor
 public class MedicalStaffController {
-//
-//    private final MedicalStaffService medicalStaffService;
-//
+
+    private final MedicalStaffFacade medicalStaffFacade;
+
 //    @PostMapping("/register")
+//    //@PreAuthorize("hasAuthority('ADMIN')")
 //    public ResponseEntity<MedicalStaffResponseDto> registerMedicalStaff(@Valid @RequestBody MedicalStaffRegistrationRequestDto request) {
 //        try {
 //            MedicalStaffResponseDto staff = medicalStaffService.create(request);

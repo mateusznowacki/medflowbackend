@@ -1,4 +1,4 @@
-package pl.medflow.medflowbackend.domain.staff_management.model;
+package pl.medflow.medflowbackend.domain.staff_management;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,11 +6,10 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.medflow.medflowbackend.domain.shared.user.User;
 import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
+import pl.medflow.medflowbackend.domain.shared.user.User;
 
 
 @Document(collection = "staff")
@@ -20,7 +19,6 @@ import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
-@CompoundIndex(name = "email_unique_staff", def = "{ 'email': 1 }", unique = true)
 public class MedicalStaff extends User {
 
     private MedicalStaffPosition position;

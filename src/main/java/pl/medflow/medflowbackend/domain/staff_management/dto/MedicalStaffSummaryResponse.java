@@ -1,16 +1,13 @@
 package pl.medflow.medflowbackend.domain.staff_management.dto;
 
 import pl.medflow.medflowbackend.domain.shared.embedded.RoomLocation;
-import pl.medflow.medflowbackend.domain.staff_management.model.MedicalStaffPosition;
+import pl.medflow.medflowbackend.domain.staff_management.MedicalStaffPosition;
 
-public record MedicalStaffResponseDto(
-        String id,
-        String firstName,
-        String lastName,
-        String email,
+public record MedicalStaffSummaryResponse(
         String phoneNumber,
         MedicalStaffPosition position,
         String department,
         RoomLocation assignedRoom,
         String licenseNumber
-) {}
+) {
+}
