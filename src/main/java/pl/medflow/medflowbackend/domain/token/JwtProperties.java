@@ -13,6 +13,8 @@ public class JwtProperties {
     private Access access = new Access();
     private Refresh refresh = new Refresh();
     private Cookie cookie = new Cookie();
+    private int clockSkewSeconds = 120;
+    private String audience = "medflow-api";
 
     @Getter
     @Setter
@@ -45,5 +47,6 @@ public class JwtProperties {
         private String path;
         private String sameSite;
         private boolean secure;
+        private String domain;
     }
 }

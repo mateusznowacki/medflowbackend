@@ -7,13 +7,16 @@ import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
 
 public interface TokenService {
 
-    LoginResult login(UserAccount user, String rawPassword);
+    // Issue tokens for already authenticated user
+    LoginResult issueTokens(UserAccount user);
 
+    // Refresh rotation with jti tracking
     LoginResult refresh(String refreshJwt);
 
-     LoginResult refreshFromRequest(HttpServletRequest request);
+    LoginResult refreshFromRequest(HttpServletRequest request);
 
-    ResponseCookie logout();
+    // Logout should revoke current refresh token by jti and expire cookie
+    ResponseCookie logout(String refreshJwtFromCookie);
 
-     AccessClaims verifyAccessToken(String accessJwt);
+    AccessClaims verifyAccessToken(String accessJwt);
 }

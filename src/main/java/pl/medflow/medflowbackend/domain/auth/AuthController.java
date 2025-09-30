@@ -1,5 +1,6 @@
 package pl.medflow.medflowbackend.domain.auth;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +34,17 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
-        var clear = authService.logout();
+    public ResponseEntity<Void> logout(HttpServletRequest req) {
+        String token = null;
+        if (req.getCookies() != null) {
+            for (Cookie c : req.getCookies()) {
+                if ("refreshToken".equals(c.getName())) { // default; can be configured
+                    token = c.getValue();
+                    break;
+                }
+            }
+        }
+        var clear = authService.logout(token);
         return ResponseEntity.noContent()
                 .header("Set-Cookie", clear.toString())
                 .build();
