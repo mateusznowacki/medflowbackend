@@ -7,7 +7,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.medflow.medflowbackend.domain.shared.enums.Role;
-import pl.medflow.medflowbackend.domain.token.JwtService;
 
 import java.util.Optional;
 
@@ -17,7 +16,6 @@ public class UserAccountService {
 
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
 
     @Transactional
     public UserAccount create(String email, String rawPassword, Role role) {

@@ -1,7 +1,6 @@
 package pl.medflow.medflowbackend.domain.token;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final TokenService tokenService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -32,11 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-
             try {
-                Claims claims = jwtService.parse(token).getPayload();
-                String userId = claims.getSubject();
-                String role = (String) claims.get("role");
+                AccessClaims claims = tokenService.verifyAccessToken(token);
+                String userId = claims.userId();
+                String role = claims.role();
 
                 var auth = new UsernamePasswordAuthenticationToken(
                         userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))
@@ -45,7 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
-                // opcjonalnie: krótkie JSON 401
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(

@@ -1,33 +1,19 @@
 package pl.medflow.medflowbackend.domain.token;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseCookie;
+import pl.medflow.medflowbackend.domain.auth.LoginResult;
 import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
 
 public interface TokenService {
 
-    String generateAccessToken(UserAccount user);
+    LoginResult login(UserAccount user, String rawPassword);
 
-    String generateRefreshToken(UserAccount user, String jti);
+    LoginResult refresh(String refreshJwt);
 
-    Jws<Claims> parse(String jwt);
+     LoginResult refreshFromRequest(HttpServletRequest request);
 
+    ResponseCookie logout();
 
-    boolean isExpired(String jwt);
-
-    String newJti();
-
-    JwtTokens issueTokens(UserAccount user);
-
-    JwtTokens rotateTokens(String refreshJwt, UserAccount user);
-
-    int getRefreshExpirationSeconds();
-
-    String getCookieName();
-
-    boolean isCookieSecure();
-
-    String getCookieSameSite();
-
-    String getCookiePath();
+     AccessClaims verifyAccessToken(String accessJwt);
 }

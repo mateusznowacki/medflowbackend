@@ -1,13 +1,19 @@
+// pl/medflow/medflowbackend/domain/token/JwtService.java
 package pl.medflow.medflowbackend.domain.token;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.medflow.medflowbackend.domain.auth.LoginResponse;
+import pl.medflow.medflowbackend.domain.auth.LoginResult;
 import pl.medflow.medflowbackend.domain.identity.account.UserAccount;
-import pl.medflow.medflowbackend.domain.identity.role.RolePermissionService;
+import pl.medflow.medflowbackend.domain.identity.account.UserAccountService;
 import pl.medflow.medflowbackend.infrastructure.secrets.AwsSecrets;
 
 import java.security.KeyFactory;
@@ -18,7 +24,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
-import java.util.UUID;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,178 +32,178 @@ public class JwtService implements TokenService {
 
     private volatile PrivateKey cachedPrivateKey;
     private volatile PublicKey cachedPublicKey;
+
     private final JwtProperties jwtProperties;
     private final AwsSecrets awsSecrets;
+    private final PasswordEncoder passwordEncoder;
+    private final UserAccountService userAccountService;
 
-    private final RolePermissionService rolePermissionService;
+    // ===== Minimal helpers =====
+    private PrivateKey privateKey() {
+        if (cachedPrivateKey == null) {
+            synchronized (this) {
+                if (cachedPrivateKey == null) {
+                    cachedPrivateKey = loadPrivateKeyFromPem(awsSecrets.getJwtPrivateKeyPem());
+                }
+            }
+        }
+        return cachedPrivateKey;
+    }
 
-    @Override
-    public String generateAccessToken(UserAccount user) {
-        var now = Instant.now();
-        var exp = now.plusSeconds(jwtProperties.getAccess().accessExpirationSeconds());
+    private PublicKey publicKey() {
+        if (cachedPublicKey == null) {
+            synchronized (this) {
+                if (cachedPublicKey == null) {
+                    cachedPublicKey = loadPublicKeyFromPem(awsSecrets.getJwtPublicKeyPem());
+                }
+            }
+        }
+        return cachedPublicKey;
+    }
 
-        var perms = rolePermissionService.getPermissions(user.getRole()).stream().map(Enum::name).toList();
+    private static PrivateKey loadPrivateKeyFromPem(String pem) {
+        try {
+            String content = pem.replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replaceAll("\\s", "");
+            byte[] bytes = Base64.getDecoder().decode(content);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
+            return KeyFactory.getInstance("RSA").generatePrivate(keySpec);
+        } catch (Exception e) {
+            throw new IllegalStateException("Invalid private key PEM", e);
+        }
+    }
 
-        return io.jsonwebtoken.Jwts.builder()
-                .setIssuer(jwtProperties.getAccess().getIssuer())
+    private static PublicKey loadPublicKeyFromPem(String pem) {
+        try {
+            String content = pem.replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replaceAll("\\s", "");
+            byte[] bytes = Base64.getDecoder().decode(content);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(bytes);
+            return KeyFactory.getInstance("RSA").generatePublic(keySpec);
+        } catch (Exception e) {
+            throw new IllegalStateException("Invalid public key PEM", e);
+        }
+    }
+
+    private String cookieName() { return Optional.ofNullable(jwtProperties.getCookie().getName()).orElse("refreshToken"); }
+    private String cookiePath() { return Optional.ofNullable(jwtProperties.getCookie().getPath()).orElse("/"); }
+    private String cookieSameSite() { return Optional.ofNullable(jwtProperties.getCookie().getSameSite()).orElse("Lax"); }
+    private boolean cookieSecure() { return jwtProperties.getCookie().isSecure(); }
+
+    private int accessTtl() { return jwtProperties.getAccess().accessExpirationSeconds(); }
+    private int refreshTtl() { return jwtProperties.getRefresh().refreshExpirationSeconds(); }
+    private String accessIssuer() { return Optional.ofNullable(jwtProperties.getAccess().getIssuer()).orElse("medflow"); }
+    private String refreshIssuer() { return Optional.ofNullable(jwtProperties.getRefresh().getIssuer()).orElse("medflow"); }
+
+    private String createAccessToken(UserAccount user) {
+        Instant now = Instant.now();
+        Instant exp = now.plusSeconds(accessTtl());
+        return Jwts.builder()
                 .setSubject(user.getId())
-                .setIssuedAt(java.util.Date.from(now))
-                .setExpiration(java.util.Date.from(exp))
-                .addClaims(java.util.Map.of(
-                        "email", user.getEmail(),
-                        "role", user.getRole() != null ? user.getRole().name() : null,
-                        "firstName", user.getFirstName(),
-                        "lastName", user.getLastName(),
-                        "permissions", perms
-                ))
-                .signWith(getPrivateKey(), signatureFor(getPrivateKey()))
+                .claim("role", user.getRole() != null ? user.getRole().name() : "USER")
+                .setIssuer(accessIssuer())
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(exp))
+                .claim("typ", "access")
+                .signWith(privateKey(), Jwts.SIG.RS256)
                 .compact();
     }
 
-    @Override
-    public String generateRefreshToken(UserAccount user, String jti) {
-        var now = Instant.now();
-        var exp = now.plusSeconds(jwtProperties.getRefresh().refreshExpirationSeconds());
-
-        return io.jsonwebtoken.Jwts.builder()
-                .setIssuer(jwtProperties.getRefresh().getIssuer())
+    private String createRefreshToken(UserAccount user) {
+        Instant now = Instant.now();
+        Instant exp = now.plusSeconds(refreshTtl());
+        return Jwts.builder()
                 .setSubject(user.getId())
-                .setId(jti)
-                .setIssuedAt(java.util.Date.from(now))
-                .setExpiration(java.util.Date.from(exp))
+                .setIssuer(refreshIssuer())
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(exp))
                 .claim("typ", "refresh")
-                .signWith(getPrivateKey(), signatureFor(getPrivateKey()))
+                .signWith(privateKey(), SignatureAlgorithm.RS256)
                 .compact();
     }
 
+    private ResponseCookie buildRefreshCookie(String token, long maxAgeSeconds) {
+        ResponseCookie.ResponseCookieBuilder b = ResponseCookie.from(cookieName(), token)
+                .httpOnly(true)
+                .secure(cookieSecure())
+                .path(cookiePath())
+                .maxAge(maxAgeSeconds);
+        String sameSite = cookieSameSite();
+        if (sameSite != null && !sameSite.isBlank()) {
+            b.sameSite(sameSite);
+        }
+        return b.build();
+    }
 
-    @Override
-    public Jws<Claims> parse(String jwt) {
+    private Claims parseAndValidate(String jwt) {
         return Jwts.parser()
-                .verifyWith(getPublicKey())
+                .verifyWith(publicKey())
                 .build()
-                .parseClaimsJws(jwt);
+                .parseSignedClaims(jwt)
+                .getPayload();
     }
 
     @Override
-    public JwtTokens issueTokens(UserAccount user) {
-        String accessToken = generateAccessToken(user);
-        String jti = newJti();
-        String refreshToken = generateRefreshToken(user, jti);
-        long expiresIn = jwtProperties.getAccess().accessExpirationSeconds();
-        return new JwtTokens(accessToken, refreshToken, jti, expiresIn);
-    }
-
-public JwtTokens rotateTokens(String refreshJwt, UserAccount user) {
-    Jws<Claims> claims = parse(refreshJwt);
-    if (isExpired(refreshJwt)) {
-        throw new IllegalStateException("Refresh token expired");
-    }
-    if (!"refresh".equals(claims.getPayload().get("typ"))) {
-        throw new IllegalArgumentException("Invalid token type");
-    }
-
-    String jti = newJti();
-    String accessToken = generateAccessToken(user);
-    String refreshToken = generateRefreshToken(user, jti);
-    long expiresIn = jwtProperties.getAccess().accessExpirationSeconds();
-    return new JwtTokens(accessToken, refreshToken, jti, expiresIn);
-}
-
-
-@Override
-    public int getRefreshExpirationSeconds() {
-        return jwtProperties.getRefresh().refreshExpirationSeconds();
-    }
-
-    @Override
-    public String getCookieName() {
-        return jwtProperties.getCookie().getName();
-    }
-
-    @Override
-    public boolean isCookieSecure() {
-        return jwtProperties.getCookie().isSecure();
-    }
-
-    @Override
-    public String getCookieSameSite() {
-        return jwtProperties.getCookie().getSameSite();
-    }
-
-    @Override
-    public String getCookiePath() {
-        return jwtProperties.getCookie().getPath();
-    }
-
-    @Override
-    public boolean isExpired(String jwt) {
-        return parse(jwt).getPayload().getExpiration().before(new Date());
-    }
-
-    @Override
-    public String newJti() {
-        return UUID.randomUUID().toString();
-    }
-
-    private static PrivateKey readPrivateKeyFromPem(String pem) {
-        byte[] der = base64Body(pem, "-----BEGIN PRIVATE KEY-----", "-----END PRIVATE KEY-----");
-        try {
-            return KeyFactory.getInstance("Ed25519").generatePrivate(new PKCS8EncodedKeySpec(der));
-        } catch (Exception ignored) {
+    public LoginResult login(UserAccount user, String rawPassword) {
+        if (user == null || rawPassword == null || !passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Invalid email or password");
         }
-        try {
-            return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(der));
-        } catch (Exception e) {
-            throw new IllegalStateException("Invalid private key (PKCS#8). Supported: Ed25519, RSA.", e);
+        String access = createAccessToken(user);
+        String refresh = createRefreshToken(user);
+        var body = LoginResponse.bearer(access, accessTtl());
+        var cookie = buildRefreshCookie(refresh, refreshTtl());
+        return new LoginResult(body, cookie);
+    }
+
+    @Override
+    public LoginResult refresh(String refreshJwt) {
+        if (refreshJwt == null || refreshJwt.isBlank()) {
+            throw new IllegalArgumentException("Refresh token is missing");
         }
-    }
-
-    private static PublicKey readPublicKeyFromPem(String pem) {
-        byte[] der = base64Body(pem, "-----BEGIN PUBLIC KEY-----", "-----END PUBLIC KEY-----");
-        try {
-            return KeyFactory.getInstance("Ed25519").generatePublic(new X509EncodedKeySpec(der));
-        } catch (Exception ignored) {
+        Claims claims = parseAndValidate(refreshJwt);
+        if (!"refresh".equals(claims.get("typ"))) {
+            throw new IllegalArgumentException("Invalid refresh token");
         }
-        try {
-            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(der));
-        } catch (Exception e) {
-            throw new IllegalStateException("Invalid public key (X.509). Supported: Ed25519, RSA.", e);
+        String userId = claims.getSubject();
+        var user = userAccountService.getById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        String access = createAccessToken(user);
+        String refresh = createRefreshToken(user);
+        var body = LoginResponse.bearer(access, accessTtl());
+        var cookie = buildRefreshCookie(refresh, refreshTtl());
+        return new LoginResult(body, cookie);
+    }
+
+    @Override
+    public LoginResult refreshFromRequest(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            throw new IllegalArgumentException("No cookies found");
         }
-    }
-
-    private PrivateKey getPrivateKey() {
-        if (cachedPrivateKey != null) return cachedPrivateKey;
-        String pem = notBlank(awsSecrets.getJwtPrivateKeyPem(), "JWT private key is empty");
-        return cachedPrivateKey = readPrivateKeyFromPem(pem);
-    }
-
-    private PublicKey getPublicKey() {
-        if (cachedPublicKey != null) return cachedPublicKey;
-        String pem = notBlank(awsSecrets.getJwtPublicKeyPem(), "JWT public key is empty");
-        return cachedPublicKey = readPublicKeyFromPem(pem);
-    }
-
-    private static byte[] base64Body(String pem, String begin, String end) {
-        String s = pem.replace(begin, "").replace(end, "").replaceAll("\\s", "");
-        return Base64.getDecoder().decode(s);
-    }
-
-    private SignatureAlgorithm signatureFor(PrivateKey key) {
-        String alg = key != null ? key.getAlgorithm() : null;
-        if (alg != null) {
-            if (alg.equalsIgnoreCase("Ed25519") || alg.equalsIgnoreCase("EdDSA")) {
-                return Jwts.SIG.EdDSA;
-            }
-            if (alg.equalsIgnoreCase("RSA")) {
-                return Jwts.SIG.RS256;
+        String token = null;
+        for (Cookie c : request.getCookies()) {
+            if (cookieName().equals(c.getName())) {
+                token = c.getValue();
+                break;
             }
         }
-        return Jwts.SIG.RS256;
+        return refresh(token);
     }
 
-    private static String notBlank(String v, String msg) {
-        if (v == null || v.trim().isEmpty()) throw new IllegalStateException(msg);
-        return v;
+    @Override
+    public ResponseCookie logout() {
+        return buildRefreshCookie("", 0);
+    }
+
+    @Override
+    public AccessClaims verifyAccessToken(String accessJwt) {
+        Claims claims = parseAndValidate(accessJwt);
+        if (!"access".equals(claims.get("typ"))) {
+            throw new IllegalArgumentException("Invalid access token");
+        }
+        String userId = claims.getSubject();
+        String role = String.valueOf(claims.get("role"));
+        return new AccessClaims(userId, role);
     }
 }
