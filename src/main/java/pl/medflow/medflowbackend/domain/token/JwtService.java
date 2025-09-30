@@ -3,12 +3,10 @@ package pl.medflow.medflowbackend.domain.token;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.medflow.medflowbackend.domain.auth.LoginResponse;
 import pl.medflow.medflowbackend.domain.auth.LoginResult;
@@ -35,11 +33,9 @@ public class JwtService implements TokenService {
 
     private final JwtProperties jwtProperties;
     private final AwsSecrets awsSecrets;
-    private final PasswordEncoder passwordEncoder;
     private final UserAccountService userAccountService;
 
-    // ===== Minimal helpers =====
-    private PrivateKey privateKey() {
+        private PrivateKey privateKey() {
         if (cachedPrivateKey == null) {
             synchronized (this) {
                 if (cachedPrivateKey == null) {
@@ -120,7 +116,7 @@ public class JwtService implements TokenService {
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(exp))
                 .claim("typ", "refresh")
-                .signWith(privateKey(), SignatureAlgorithm.RS256)
+                .signWith(privateKey(), Jwts.SIG.RS256)
                 .compact();
     }
 
@@ -147,7 +143,7 @@ public class JwtService implements TokenService {
 
     @Override
     public LoginResult login(UserAccount user, String rawPassword) {
-        if (user == null || rawPassword == null || !passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
+        if (user == null || rawPassword == null || !userAccountService.verifyPassword(user.getEmail(), rawPassword)) {
             throw new IllegalArgumentException("Invalid email or password");
         }
         String access = createAccessToken(user);
