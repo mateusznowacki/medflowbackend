@@ -1,265 +1,257 @@
 {
   "info": {
-    "_postman_id": "d4d7bb6f-9a5c-4f0a-9d81-4a1e55a0c9e1",
-    "name": "MedFlow Backend - MedicalStaff Controller",
+    "_postman_id": "7d8d3c2a-4f33-4a7e-9f6c-7b0d3f77c2d1",
+    "name": "MedicalStaffController",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Zbiór zapytań Postman do testowania kontrolera Medical Staff (/api/medical-staff)."
+    "description": "Collection for Medical Staff Management API. Requires Bearer access token in Authorization (you can obtain it using AuthController collection)."
   },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "sampleAccountId", "value": "64f000000000000000000001", "type": "string" },
+    { "key": "sampleLicense", "value": "PWZ-1234567", "type": "string" },
+    { "key": "position", "value": "DOCTOR", "type": "string" }
+  ],
   "item": [
     {
-      "name": "Medical Staff",
-      "item": [
-        {
-          "name": "Register medical staff",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-staff/register",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-staff",
-                "register"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Anna\",\n  \"lastName\": \"Kowalska\",\n  \"email\": \"anna.kowalska@example.com\",\n  \"password\": \"password123!\",\n  \"phoneNumber\": \"+48 600 700 800\",\n  \"position\": \"NURSE\",\n  \"department\": \"Pediatria\",\n  \"assignedRoom\": {\n    \"building\": \"A\",\n    \"floor\": \"2\",\n    \"roomNumber\": \"205\"\n  },\n  \"licenseNumber\": \"NUR-PL-123456\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status is 201 CREATED\", function () { pm.response.to.have.status(201); });",
-                  "try {",
-                  "  var json = pm.response.json();",
-                  "  if (json && json.id) {",
-                  "    pm.collectionVariables.set('createdId', json.id);",
-                  "    pm.collectionVariables.set('id', json.id);",
-                  "  }",
-                  "} catch(e) { /* ignore if not json */ }"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "response": []
+      "name": "Register (strict)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/register",
+          "host": [ "{{baseUrl}}" ],
+          "path": ["api", "v1", "medical-staff", "register"]
         },
-        {
-          "name": "Get all medical staff",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-staff",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-staff"
-              ]
-            }
-          },
-          "response": []
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Anna\",\n  \"lastName\": \"Kowalska\",\n  \"email\": \"anna.kowalska@example.com\",\n  \"password\": \"StrongPass123!\",\n  \"phoneNumber\": \"+48123123123\",\n  \"position\": \"{{position}}\",\n  \"department\": \"Cardiology\",\n  \"assignedRoom\": { \n    \"building\": \"A\",\n    \"floor\": 2,\n    \"roomNumber\": \"205\"\n  },\n  \"licenseNumber\": \"{{sampleLicense}}\"\n}"
         },
-        {
-          "name": "Get medical staff by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-staff/{{id}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-staff",
-                "{{id}}"
-              ]
-            }
-          },
-          "response": []
+        "description": "Registers new medical staff. Fails if email already exists."
+      },
+      "response": []
+    },
+    {
+      "name": "Register (idempotent)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/register/idempotent",
+          "host": [ "{{baseUrl}}" ],
+          "path": ["api", "v1", "medical-staff", "register", "idempotent"]
         },
-        {
-          "name": "Get medical staff by position",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-staff/position/{{position}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-staff",
-                "position",
-                "{{position}}"
-              ]
-            }
-          },
-          "response": []
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Anna\",\n  \"lastName\": \"Kowalska\",\n  \"email\": \"anna.kowalska@example.com\",\n  \"password\": \"StrongPass123!\",\n  \"phoneNumber\": \"+48123123123\",\n  \"position\": \"{{position}}\",\n  \"department\": \"Cardiology\",\n  \"assignedRoom\": { \n    \"building\": \"A\",\n    \"floor\": 2,\n    \"roomNumber\": \"205\"\n  },\n  \"licenseNumber\": \"{{sampleLicense}}\"\n}"
         },
-        {
-          "name": "Get medical staff by department",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-staff/department/{{department}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-staff",
-                "department",
-                "{{department}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update medical staff",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-staff/{{id}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-staff",
-                "{{id}}"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"anna.new@example.com\",\n  \"phoneNumber\": \"+48 600 700 801\",\n  \"position\": \"RECEPTIONIST\",\n  \"department\": \"Rejestracja\",\n  \"assignedRoom\": {\n    \"building\": \"B\",\n    \"floor\": \"0\",\n    \"roomNumber\": \"R1\"\n  },\n  \"licenseNumber\": \"REC-PL-654321\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete medical staff",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-staff/{{id}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-staff",
-                "{{id}}"
-              ]
-            }
-          },
-          "response": []
+        "description": "Registers staff idempotently. Returns profile if account already exists."
+      },
+      "response": []
+    },
+    {
+      "name": "Get summary by ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/{{sampleAccountId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","{{sampleAccountId}}"]
         }
-      ]
-    }
-  ],
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8080"
+      },
+      "response": []
     },
     {
-      "key": "token",
-      "value": "",
-      "description": "Opcjonalny token Bearer jeśli aplikacja wymaga autoryzacji."
+      "name": "Get all summaries",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff"]
+        }
+      },
+      "response": []
     },
     {
-      "key": "id",
-      "value": "{{createdId}}",
-      "description": "ID pracownika medycznego (możesz wstawić ręcznie lub użyć z testów)."
+      "name": "Get summary by email",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/by-email?email=anna.kowalska@example.com",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","by-email"],
+          "query": [ {"key":"email","value":"anna.kowalska@example.com"} ]
+        }
+      },
+      "response": []
     },
     {
-      "key": "position",
-      "value": "NURSE"
+      "name": "Get summary by license",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/by-license/{{sampleLicense}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","by-license","{{sampleLicense}}"]
+        }
+      },
+      "response": []
     },
     {
-      "key": "department",
-      "value": "Pediatria"
-    }
-  ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": []
-      }
+      "name": "Get profile by ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/profiles/{{sampleAccountId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","profiles","{{sampleAccountId}}"]
+        }
+      },
+      "response": []
     },
     {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": []
-      }
+      "name": "Get profiles (batch)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "[\n  \"{{sampleAccountId}}\",\n  \"64f000000000000000000002\"\n]"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/profiles/batch",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","profiles","batch"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Search",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/search?q=ann&position={{position}}&page=0&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","search"],
+          "query": [
+            {"key":"q","value":"ann"},
+            {"key":"position","value":"{{position}}"},
+            {"key":"page","value":"0"},
+            {"key":"size","value":"10"}
+          ]
+        },
+        "description": "Searches by name/email/license/department with optional position and pagination."
+      },
+      "response": []
+    },
+    {
+      "name": "Update contact",
+      "request": {
+        "method": "PATCH",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/{{sampleAccountId}}/contact",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","{{sampleAccountId}}","contact"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"newEmail\": \"anna.kowalska+new@example.com\",\n  \"phone\": \"+48123123124\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update name",
+      "request": {
+        "method": "PATCH",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/{{sampleAccountId}}/name",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","{{sampleAccountId}}","name"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Anna Maria\",\n  \"lastName\": \"Kowalska\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update professional data",
+      "request": {
+        "method": "PATCH",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/{{sampleAccountId}}/professional",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","{{sampleAccountId}}","professional"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phoneNumber\": \"+48111111111\",\n  \"position\": \"{{position}}\",\n  \"department\": \"Oncology\",\n  \"assignedRoom\": { \n    \"building\": \"B\",\n    \"floor\": 1,\n    \"roomNumber\": \"112\"\n  },\n  \"licenseNumber\": \"{{sampleLicense}}\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Change status",
+      "request": {
+        "method": "PATCH",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/{{sampleAccountId}}/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","{{sampleAccountId}}","status"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"active\": true,\n  \"reason\": \"Manual activation\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Change password",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/{{sampleAccountId}}/password",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","{{sampleAccountId}}","password"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"newPassword\": \"EvenStrongerPass456!\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/medical-staff/{{sampleAccountId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","v1","medical-staff","{{sampleAccountId}}"]
+        }
+      },
+      "response": []
     }
   ]
 }

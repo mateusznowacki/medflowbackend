@@ -71,13 +71,15 @@ public class MedicalStaffController {
 
     // Updates
     @PatchMapping("/{accountId}/contact")
-    public void updateContact(@PathVariable String accountId, @Valid @RequestBody UpdateContactRequest request) {
+    public MedicalStaffProfileResponse updateContact(@PathVariable String accountId, @Valid @RequestBody UpdateContactRequest request) {
         medicalStaffFacade.updateContact(accountId, request.newEmail(), Optional.ofNullable(request.phone()));
+        return medicalStaffFacade.getProfile(accountId);
     }
 
     @PatchMapping("/{accountId}/name")
-    public void updateName(@PathVariable String accountId, @Valid @RequestBody UpdateNameRequest request) {
+    public MedicalStaffProfileResponse updateName(@PathVariable String accountId, @Valid @RequestBody UpdateNameRequest request) {
         medicalStaffFacade.updateName(accountId, request.firstName(), request.lastName());
+        return medicalStaffFacade.getProfile(accountId);
     }
 
     @PatchMapping("/{accountId}/professional")
@@ -86,8 +88,9 @@ public class MedicalStaffController {
     }
 
     @PatchMapping("/{accountId}/status")
-    public void changeStatus(@PathVariable String accountId, @Valid @RequestBody ChangeStatusRequest request) {
+    public MedicalStaffProfileResponse changeStatus(@PathVariable String accountId, @Valid @RequestBody ChangeStatusRequest request) {
         medicalStaffFacade.changeStatus(accountId, request.active(), Optional.ofNullable(request.reason()));
+        return medicalStaffFacade.getProfile(accountId);
     }
 
     @PostMapping("/{accountId}/password")
