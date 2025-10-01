@@ -76,8 +76,30 @@ public class UserAccountService {
         return accountRepository.findById(id);
     }
 
+    public UserAccount getRequiredById(@NotBlank String id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Account with id " + id + " not found."));
+    }
+
     public Optional<UserAccount> findByEmail(@Email @NotBlank String email) {
         return accountRepository.findByEmail(email);
     }
 
+    @Transactional
+    public void updateEmailById(String id, String newEmail) {
+        if (accountRepository.existsByEmail(newEmail)) {
+            throw new IllegalArgumentException("Account with email " + newEmail + " already exists.");
+        }
+        var account = getRequiredById(id);
+        account.setEmail(newEmail);
+        accountRepository.save(account);
+    }
+
+    @Transactional
+    public void updateName(String id, String firstName, String lastName) {
+        var account = getRequiredById(id);
+        account.setFirstName(firstName);
+        account.setLastName(lastName);
+        accountRepository.save(account);
+    }
 }

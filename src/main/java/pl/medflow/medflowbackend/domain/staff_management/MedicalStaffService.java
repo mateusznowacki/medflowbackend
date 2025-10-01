@@ -50,6 +50,10 @@ public class MedicalStaffService {
                 .map(this::mapToResponse)
                 .toList();
     }
+
+    public List<MedicalStaff> getAllEntities() {
+        return medicalStaffRepository.findAll();
+    }
     
     public MedicalStaffSummaryResponse getByLicenseNumber(String licenseNumber) {
         var staff= medicalStaffRepository.findByLicenseNumber(licenseNumber).orElseThrow(() ->
@@ -114,6 +118,22 @@ public class MedicalStaffService {
                 staff.getAssignedRoom(),
                 staff.getLicenseNumber()
         );
+    }
+
+    @Transactional
+    public void updatePhone(String accountId, String newPhone) {
+        var staff = medicalStaffRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Medical staff with id " + accountId + " not found"));
+        staff.setPhoneNumber(newPhone);
+        medicalStaffRepository.save(staff);
+    }
+
+    @Transactional
+    public void setActive(String accountId, boolean active) {
+        var staff = medicalStaffRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Medical staff with id " + accountId + " not found"));
+        staff.setActive(active);
+        medicalStaffRepository.save(staff);
     }
     
     
